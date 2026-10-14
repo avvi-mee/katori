@@ -1,0 +1,25 @@
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+*.tsbuildinfo
+coverage/
+
+# env files: only .env.example is committed
+.env
+.env.*
+!.env.example
+supabase/.env
+supabase/functions/.env
+
+# supabase local
+supabase/.branches
+supabase/.temp
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
