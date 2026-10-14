@@ -1,0 +1,384 @@
+# Katori food_items seed. Values are per 100 g as eaten (home-normal recipe).
+# AUTHORED APPROXIMATIONS from standard recipes and IFCT/USDA-style ingredient values: every row is
+# source=recipe, is_verified=false and needs a nutritionist's review before launch.
+# kcal is not stored here: scripts/build-seed.mjs derives it as 4*protein + 4*carbs + 9*fat.
+# unit = default unit. unit_grams = grams per unit for count/plate/scoop/glass/tbsp units ("piece:40|plate:250").
+# density = g/ml, used for katori (user's katori ml) and as a fallback for glass/tbsp.
+# oil_g = grams of oil/ghee per 100 g already included at home-normal level (the oil question scales it).
+slug,name,aliases,cuisine,region,kind,unit,unit_grams,density,protein,carbs,fat,oil_g
+roti,Roti,chapati|phulka|fulka|rotli|chapathi|chapatti,north_indian,pan,dish,roti,roti:40,,9,50,2.5,0
+tandoori-roti,Tandoori Roti,tandoori rotti,north_indian,north,dish,roti,roti:55,,9,52,1.5,0
+missi-roti,Missi Roti,besan roti,north_indian,north,dish,roti,roti:60,,11,45,7,4
+makki-roti,Makki di Roti,makki ki roti|corn roti,punjabi,north,dish,roti,roti:60,,7,48,8,5
+bajra-roti,Bajra Roti,bajra bhakri|bajre ki roti,rajasthani,west,dish,roti,roti:60,,9,55,5,2
+jowar-bhakri,Jowar Bhakri,jowar roti|jolada rotti,maharashtrian,west,dish,roti,roti:55,,8,58,2,0
+rumali-roti,Rumali Roti,roomali roti,mughlai,north,dish,roti,roti:50,,9,52,4,1
+akki-roti,Akki Roti,rice roti,karnataka,south,dish,roti,roti:70,,4,40,7,5
+plain-paratha,Plain Paratha,parantha|tawa paratha|paratha,north_indian,north,dish,piece,piece:70,,7.5,45,13,10
+laccha-paratha,Lachha Paratha,laccha parantha,punjabi,north,dish,piece,piece:80,,7,44,16,12
+aloo-paratha,Aloo Paratha,alu paratha|potato paratha,punjabi,north,dish,piece,piece:120,,6,38,10,8
+gobi-paratha,Gobi Paratha,gobhi paratha,punjabi,north,dish,piece,piece:120,,6,35,10,8
+paneer-paratha,Paneer Paratha,,punjabi,north,dish,piece,piece:120,,10,33,13,8
+methi-paratha,Methi Paratha,,north_indian,north,dish,piece,piece:70,,8,42,12,9
+mooli-paratha,Mooli Paratha,muli paratha,punjabi,north,dish,piece,piece:110,,6,36,10,8
+onion-paratha,Pyaaz Paratha,onion paratha,punjabi,north,dish,piece,piece:110,,6,38,10,8
+egg-paratha,Egg Paratha,anda paratha,street,pan,dish,piece,piece:130,,9,30,14,10
+sattu-paratha,Sattu Paratha,,bihari,east,dish,piece,piece:110,,9,38,10,7
+thepla,Methi Thepla,thepla,gujarati,west,dish,piece,piece:40,,8,42,12,9
+plain-naan,Plain Naan,naan|nan,mughlai,north,dish,piece,piece:90,,9,50,5,2
+butter-naan,Butter Naan,,mughlai,north,dish,piece,piece:95,,8.5,48,9,6
+garlic-naan,Garlic Naan,,mughlai,north,dish,piece,piece:95,,8.5,48,9.5,6
+kulcha,Plain Kulcha,kulche,punjabi,north,dish,piece,piece:80,,8,48,7,4
+amritsari-kulcha,Amritsari Kulcha,stuffed kulcha|aloo kulcha,punjabi,north,dish,piece,piece:130,,7,40,11,8
+puri,Puri,poori,north_indian,pan,dish,piece,piece:25,,7,44,18,16
+luchi,Luchi,,bengali,east,dish,piece,piece:20,,7,46,20,18
+bhatura,Bhatura,bhature,punjabi,north,dish,piece,piece:70,,7.5,48,16,14
+kerala-parotta,Kerala Parotta,malabar parotta|porotta|parotta,kerala,south,dish,piece,piece:100,,7,45,15,12
+baati,Baati,dal baati,rajasthani,west,dish,piece,piece:80,,8,50,18,15
+litti,Litti,litti chokha,bihari,east,dish,piece,piece:80,,9,45,10,6
+thalipeeth,Thalipeeth,,maharashtrian,west,dish,piece,piece:80,,9,40,10,7
+puran-poli,Puran Poli,holige|obbattu,maharashtrian,west,dish,piece,piece:80,,7,55,10,6
+appam,Appam,palappam|hoppers,kerala,south,dish,piece,piece:60,,3,30,3,1
+idiyappam,Idiyappam,string hoppers|nool puttu,kerala,south,dish,piece,piece:40,,2.5,32,0.5,0
+puttu,Puttu,,kerala,south,dish,piece,piece:100,,3.5,37,3,0
+plain-dosa,Plain Dosa,dosa|sada dosa|dosai,south_indian,south,dish,piece,piece:90,,4,30,4,3
+masala-dosa,Masala Dosa,,south_indian,south,dish,piece,piece:200,,4,28,6,4
+mysore-masala-dosa,Mysore Masala Dosa,,south_indian,south,dish,piece,piece:220,,4,28,7,5
+rava-dosa,Rava Dosa,rava dosai|sooji dosa,south_indian,south,dish,piece,piece:100,,4,30,8,6
+set-dosa,Set Dosa,sponge dosa,south_indian,south,dish,piece,piece:60,,4,32,3,2
+neer-dosa,Neer Dosa,,karnataka,south,dish,piece,piece:50,,2.5,30,2,1
+ragi-dosa,Ragi Dosa,,south_indian,south,dish,piece,piece:80,,4,30,4,3
+adai,Adai,,south_indian,south,dish,piece,piece:100,,8,26,6,4
+pesarattu,Pesarattu,moong dosa,andhra,south,dish,piece,piece:100,,8,22,5,4
+onion-uttapam,Onion Uttapam,uttapam|oothappam,south_indian,south,dish,piece,piece:150,,4.5,28,5,4
+idli,Idli,idly,south_indian,south,dish,piece,piece:40,,4.5,28,0.5,0
+rava-idli,Rava Idli,sooji idli,south_indian,south,dish,piece,piece:50,,4.5,26,5,3
+medu-vada,Medu Vada,vada|uddina vade|ulundu vadai,south_indian,south,dish,piece,piece:45,,7,25,17,15
+masala-vada,Masala Vada,paruppu vadai|dal vada,south_indian,south,dish,piece,piece:40,,9,28,15,13
+ragi-mudde,Ragi Mudde,ragi ball|ragi sangati,karnataka,south,dish,piece,piece:150,,2.5,26,0.5,0
+kozhukattai,Kozhukattai,,south_indian,south,dish,piece,piece:40,,2,40,4,0
+pav,Pav,ladi pav|bun pav|pao,street,west,dish,piece,piece:40,,8.5,50,4,0
+steamed-rice,Steamed Rice,chawal|plain rice|white rice|bhaat|bhat|annam|sadam|rice,north_indian,pan,dish,plate,scoop:120|plate:250,0.75,2.7,28.5,0.3,0
+jeera-rice,Jeera Rice,cumin rice,north_indian,north,dish,plate,scoop:120|plate:250,0.75,3,28,3.5,3
+ghee-rice,Ghee Rice,neychoru,kerala,south,dish,plate,scoop:120|plate:250,0.75,3,27,7,6
+brown-rice,Brown Rice,,continental,pan,dish,plate,scoop:120|plate:250,0.75,2.6,23,0.9,0
+veg-pulao,Veg Pulao,pulav|vegetable pulao|pulao,north_indian,pan,dish,plate,scoop:130|plate:260,0.7,3,24,4,3.5
+matar-pulao,Matar Pulao,peas pulao,north_indian,north,dish,plate,scoop:130|plate:260,0.7,3.5,25,4,3.5
+veg-biryani,Veg Biryani,vegetable biryani|tehri,mughlai,pan,dish,plate,scoop:150|plate:300,0.7,3.5,26,6,5
+chicken-biryani,Chicken Biryani,murgh biryani|biryani|kolkata biryani|hyderabadi biryani,hyderabadi,pan,dish,plate,scoop:150|plate:300,0.7,9,22,7,5
+mutton-biryani,Mutton Biryani,gosht biryani,hyderabadi,pan,dish,plate,scoop:150|plate:300,0.7,9,21,9,5
+egg-biryani,Egg Biryani,anda biryani,hyderabadi,pan,dish,plate,scoop:150|plate:300,0.7,6.5,23,7,5
+paneer-biryani,Paneer Biryani,,mughlai,north,dish,plate,scoop:150|plate:300,0.7,6,24,8,5
+curd-rice,Curd Rice,thayir sadam|dahi chawal|mosaranna,south_indian,south,dish,plate,scoop:150|plate:250,0.9,3,17,3,1.5
+lemon-rice,Lemon Rice,chitranna|elumichai sadam,south_indian,south,dish,plate,scoop:130|plate:250,0.75,3,27,5,4.5
+tamarind-rice,Puliyogare,tamarind rice|puliodarai|pulihora,south_indian,south,dish,plate,scoop:130|plate:250,0.75,3,28,6,5
+tomato-rice,Tomato Rice,thakkali sadam,south_indian,south,dish,plate,scoop:130|plate:250,0.75,3,26,5,4.5
+coconut-rice,Coconut Rice,thengai sadam,south_indian,south,dish,plate,scoop:130|plate:250,0.75,3,25,8,3
+sambar-rice,Sambar Rice,sambar sadam,south_indian,south,dish,plate,scoop:150|plate:280,0.9,3.5,20,3,2
+khichdi,Moong Dal Khichdi,khichri|khichdi|dal khichdi,north_indian,pan,dish,katori,plate:280,0.95,4,17,2.5,2
+masala-khichdi,Masala Khichdi,,gujarati,west,dish,katori,plate:280,0.95,4.5,18,4,3.5
+bisi-bele-bath,Bisi Bele Bath,bisibelebath,karnataka,south,dish,katori,plate:280,0.95,4,18,4.5,3.5
+ven-pongal,Ven Pongal,khara pongal|pongal,south_indian,south,dish,katori,plate:250,0.9,4.5,20,6,5
+veg-fried-rice,Veg Fried Rice,fried rice,indo_chinese,pan,dish,plate,scoop:130|plate:260,0.7,3.5,27,5,4.5
+egg-fried-rice,Egg Fried Rice,,indo_chinese,pan,dish,plate,scoop:130|plate:260,0.7,5.5,25,6,4.5
+chicken-fried-rice,Chicken Fried Rice,,indo_chinese,pan,dish,plate,scoop:130|plate:260,0.7,7.5,24,6,4.5
+schezwan-fried-rice,Schezwan Fried Rice,szechuan rice,indo_chinese,pan,dish,plate,scoop:130|plate:260,0.7,3.5,27,6.5,5.5
+dal-tadka,Dal Tadka,tadka dal|yellow dal|dal|daal,north_indian,pan,dish,katori,,1.03,6,14,4.5,4
+dal-fry,Dal Fry,,north_indian,pan,dish,katori,,1.03,6,14,5,4.5
+dal-makhani,Dal Makhani,maa ki dal|kaali dal|black dal,punjabi,north,dish,katori,,1.05,6,13,8,6
+moong-dal,Moong Dal,yellow moong dal|mung dal,north_indian,pan,dish,katori,,1.03,6,12,3,2.5
+masoor-dal,Masoor Dal,lal masoor|red lentil dal,north_indian,pan,dish,katori,,1.03,6.5,13,3,2.5
+chana-dal,Chana Dal,,north_indian,pan,dish,katori,,1.03,7,16,4,3.5
+toor-dal,Toor Dal (plain),arhar dal|tuvar dal|varan|paruppu,pan_indian,pan,dish,katori,,1.03,6,13,1.5,1
+gujarati-dal,Gujarati Dal,khatti meethi dal,gujarati,west,dish,katori,,1.03,4.5,12,2.5,2
+panchmel-dal,Panchmel Dal,panchratna dal,rajasthani,west,dish,katori,,1.03,6.5,14,4.5,4
+dal-palak,Dal Palak,palak dal|spinach dal,north_indian,pan,dish,katori,,1.03,5.5,11,4,3.5
+dal-dhokli,Dal Dhokli,,gujarati,west,dish,katori,,1.03,5,18,4,3
+sambar,Sambar,sambhar,south_indian,south,dish,katori,,1.02,3,9,2.5,2
+rasam,Rasam,saaru|chaaru,south_indian,south,dish,katori,,1.01,1,5,1.5,1
+rajma,Rajma,rajmah|kidney bean curry,punjabi,north,dish,katori,,1.05,6.5,16,4,3.5
+chole,Chole,chana masala|chickpea curry|chhole|chholey,punjabi,north,dish,katori,,1,7,20,6,5
+kadhi-pakora,Kadhi Pakora,kadhi|punjabi kadhi,north_indian,north,dish,katori,,1.03,4,9,6,4
+gujarati-kadhi,Gujarati Kadhi,,gujarati,west,dish,katori,,1.03,2.5,7,3,2
+lobia,Lobia Masala,black eyed peas curry|chawli,north_indian,north,dish,katori,,1,6.5,16,4,3.5
+kala-chana,Kala Chana Curry,black chana|kala chana masala,north_indian,pan,dish,katori,,1,7.5,20,4.5,4
+matki-usal,Matki Usal,usal|moth beans curry,maharashtrian,west,dish,katori,,0.9,7,17,5,4.5
+misal,Misal,misal pav|kolhapuri misal,maharashtrian,west,dish,katori,,0.95,6,15,8,6.5
+ghugni,Ghugni,,bengali,east,dish,katori,,1,7,18,4,3
+pithla,Pithla,pitla,maharashtrian,west,dish,katori,,1,6,12,5,4
+zunka,Zunka,jhunka,maharashtrian,west,dish,katori,,0.7,9,20,8,7
+kootu,Kootu,,south_indian,south,dish,katori,,0.95,4,10,4,2
+haleem,Haleem,,hyderabadi,south,dish,katori,,1.05,10,12,9,5
+aloo-gobi,Aloo Gobi,aloo gobhi|alu gobi|gobi sabzi,north_indian,pan,dish,katori,,0.65,2.5,12,6,5.5
+aloo-matar,Aloo Matar,alu mutter,north_indian,pan,dish,katori,,0.85,3,13,5,4.5
+jeera-aloo,Jeera Aloo,aloo jeera|aloo fry,north_indian,pan,dish,katori,,0.65,2,17,6,5.5
+aloo-tamatar,Aloo Tamatar,aloo ki sabzi|aloo rassa|puri wali aloo,north_indian,north,dish,katori,,0.95,2,12,4.5,4
+aloo-methi,Aloo Methi,methi aloo,north_indian,north,dish,katori,,0.65,2.5,14,6,5.5
+aloo-palak,Aloo Palak,,north_indian,north,dish,katori,,0.85,2.5,10,5,4.5
+aloo-baingan,Aloo Baingan,,north_indian,pan,dish,katori,,0.75,2,11,6,5.5
+dum-aloo,Dum Aloo,kashmiri dum aloo,north_indian,pan,dish,katori,,0.9,2.5,15,9,7.5
+aloo-posto,Aloo Posto,,bengali,east,dish,katori,,0.75,3,15,9,7
+bhindi-masala,Bhindi Masala,okra fry|bhindi fry|bhendi|bhindi,north_indian,pan,dish,katori,,0.55,2.5,9,8,7.5
+baingan-bharta,Baingan Bharta,baigan bharta|vangyache bharit|bharta,north_indian,pan,dish,katori,,0.8,2,8,6,5.5
+bharli-vangi,Bharli Vangi,stuffed brinjal|gutti vankaya,maharashtrian,west,dish,katori,,0.8,3,10,10,8
+chokha,Baingan Chokha,chokha,bihari,east,dish,katori,,0.85,1.8,9,4,3
+mix-veg,Mix Veg,mixed vegetable sabzi|mixed veg|sabzi,north_indian,pan,dish,katori,,0.75,2.5,9,5.5,5
+veg-jalfrezi,Veg Jalfrezi,,north_indian,pan,dish,katori,,0.7,2.5,9,6,5.5
+cabbage-sabzi,Patta Gobhi Sabzi,cabbage sabzi|cabbage poriyal|cabbage thoran,north_indian,pan,dish,katori,,0.6,1.8,7,5,4.5
+beans-poriyal,Beans Poriyal,beans thoran|beans sabzi|french beans,south_indian,south,dish,katori,,0.6,2.5,8,6,4
+lauki-sabzi,Lauki Sabzi,dudhi|ghiya|bottle gourd sabzi|lauki,north_indian,pan,dish,katori,,0.85,1,5,3.5,3
+tinda,Tinda Masala,round gourd|tinda,north_indian,north,dish,katori,,0.8,1.2,6,4,3.5
+karela,Karela Sabzi,bitter gourd fry|pavakkai|karela fry,north_indian,pan,dish,katori,,0.6,2,9,8,7.5
+kaddu-sabzi,Kaddu ki Sabzi,pumpkin sabzi|bhopla|kaddu,north_indian,pan,dish,katori,,0.85,1.3,10,4,3.5
+gajar-matar,Gajar Matar,carrot peas sabzi,north_indian,north,dish,katori,,0.8,3,11,4.5,4
+arbi-fry,Arbi Fry,arbi masala|taro|arbi,north_indian,north,dish,katori,,0.7,2,18,6,5.5
+sarson-saag,Sarson ka Saag,saag,punjabi,north,dish,katori,,0.95,3,7,7,5.5
+bharwa-shimla,Bharwa Shimla Mirch,stuffed capsicum,north_indian,north,dish,piece,piece:120,,3,12,6,4.5
+undhiyu,Undhiyu,,gujarati,west,dish,katori,,0.8,4,16,10,8.5
+sev-tameta,Sev Tameta,sev tamatar,gujarati,west,dish,katori,,0.85,4,14,9,6
+shukto,Shukto,,bengali,east,dish,katori,,0.8,2,8,5,4
+avial,Avial,aviyal,kerala,south,dish,katori,,0.85,2.5,8,7,2.5
+veg-kurma,Veg Kurma,vegetable korma|kurma|veg korma,south_indian,south,dish,katori,,0.95,3,9,9,5
+navratan-korma,Navratan Korma,,mughlai,north,dish,katori,,1,4,12,14,7
+mushroom-masala,Mushroom Masala,mushroom curry,north_indian,pan,dish,katori,,0.9,3.5,6,7,6
+soya-chunks-curry,Soya Chunks Curry,soya bean curry|meal maker curry|nutrela|soya chunks,north_indian,pan,dish,katori,,0.9,11,10,5,4.5
+pav-bhaji,Pav Bhaji (bhaji),bhaji|pav bhaji,street,west,dish,katori,,1,3,13,7,6
+palak-paneer,Palak Paneer,saag paneer,punjabi,north,dish,katori,,0.95,7,5,11,6
+paneer-butter-masala,Paneer Butter Masala,paneer makhani|paneer makhanwala,punjabi,north,dish,katori,,1,8,7,18,9
+kadai-paneer,Kadai Paneer,karahi paneer,punjabi,north,dish,katori,,0.85,9,7,15,8
+shahi-paneer,Shahi Paneer,,mughlai,north,dish,katori,,1,8,8,19,8
+matar-paneer,Matar Paneer,mutter paneer,north_indian,north,dish,katori,,0.95,7,9,11,6
+paneer-tikka-masala,Paneer Tikka Masala,,punjabi,north,dish,katori,,1,9,8,16,8
+paneer-bhurji,Paneer Bhurji,,north_indian,north,dish,katori,,0.7,14,5,17,7
+paneer-tikka,Paneer Tikka,tandoori paneer|grilled paneer,punjabi,north,dish,piece,piece:30,,15,6,16,5
+chilli-paneer,Chilli Paneer,,indo_chinese,pan,dish,katori,,0.75,11,10,15,9
+malai-kofta,Malai Kofta,,mughlai,north,dish,katori,,1,5,12,17,10
+tofu-bhurji,Tofu Bhurji,,continental,pan,dish,katori,,0.7,11,4,9,6
+butter-chicken,Butter Chicken,murgh makhani|chicken makhani,punjabi,north,dish,katori,,1,14,6,13,7
+chicken-curry,Chicken Curry,chicken masala|murgh curry|kozhi curry|chicken gravy,north_indian,pan,dish,katori,,1,15,4,9,6
+chicken-tikka-masala,Chicken Tikka Masala,,punjabi,north,dish,katori,,1,14,6,11,6
+kadai-chicken,Kadai Chicken,karahi chicken,punjabi,north,dish,katori,,0.95,16,5,11,7
+chicken-korma,Chicken Korma,murgh korma,mughlai,north,dish,katori,,1,13,6,14,7
+chicken-chettinad,Chicken Chettinad,,south_indian,south,dish,katori,,1,15,5,12,7
+chicken-ghee-roast,Chicken Ghee Roast,mangalorean ghee roast,karnataka,south,dish,katori,,0.85,17,5,16,10
+chicken-stew,Kerala Chicken Stew,ishtu|chicken ishtu,kerala,south,dish,katori,,1,10,5,9,3
+chicken-keema,Chicken Keema,chicken mince,north_indian,pan,dish,katori,,0.9,17,4,10,6.5
+chilli-chicken,Chilli Chicken,chilly chicken,indo_chinese,pan,dish,katori,,0.85,15,10,11,8
+chicken-manchurian,Chicken Manchurian,,indo_chinese,pan,dish,katori,,0.9,14,10,11,8
+chicken-tikka,Chicken Tikka,,punjabi,north,dish,piece,piece:35,,24,4,8,3
+tandoori-chicken,Tandoori Chicken,,punjabi,north,dish,piece,piece:150,,25,4,9,2
+chicken-65,Chicken 65,,south_indian,south,dish,piece,piece:25,,18,10,14,10
+chicken-lollipop,Chicken Lollipop,,indo_chinese,pan,dish,piece,piece:40,,17,10,15,11
+chicken-seekh,Chicken Seekh Kebab,seekh kabab|seekh kebab,mughlai,north,dish,piece,piece:50,,18,4,12,4
+grilled-chicken,Grilled Chicken Breast,chicken breast|grilled chicken,continental,pan,dish,piece,piece:150,,30,0,5,2
+chicken-salad,Chicken Salad,,continental,pan,dish,katori,,0.5,14,4,5,2
+chicken-soup,Chicken Soup,chicken clear soup,indo_chinese,pan,dish,katori,,1,4,3,1.5,1
+chicken-momos,Chicken Momos (steamed),chicken momo,tibetan,pan,dish,piece,piece:25,,9,22,5,1
+chicken-shawarma,Chicken Shawarma,shawarma roll|shawarma,middle_eastern,pan,dish,piece,piece:250,,11,22,10,6
+chicken-kathi-roll,Chicken Kathi Roll,chicken roll|chicken frankie,street,east,dish,piece,piece:200,,11,25,11,7
+chicken-sandwich,Chicken Sandwich,,continental,pan,dish,piece,piece:170,,11,22,7,0
+chicken-burger,Chicken Burger,,continental,pan,dish,piece,piece:180,,12,26,12,6
+mutton-curry,Mutton Curry,gosht curry|mutton masala|mutton gravy,north_indian,pan,dish,katori,,1,14,4,14,6.5
+rogan-josh,Mutton Rogan Josh,rogan josh,kashmiri,north,dish,katori,,1,14,4,15,7
+kosha-mangsho,Kosha Mangsho,bengali mutton curry,bengali,east,dish,katori,,0.95,15,4,16,8
+mutton-keema,Mutton Keema,keema|keema matar,north_indian,pan,dish,katori,,0.9,15,5,16,6.5
+nihari,Mutton Nihari,nihari,mughlai,north,dish,katori,,1,13,4,13,6
+mutton-seekh,Mutton Seekh Kebab,,mughlai,north,dish,piece,piece:50,,16,4,18,4
+fish-curry,Fish Curry,machli curry|meen curry|macher jhol|fish gravy,coastal,pan,dish,katori,,1,13,4,7,5
+goan-fish-curry,Goan Fish Curry,,goan,west,dish,katori,,1,11,5,10,4
+fish-fry,Fish Fry,tawa fish|rava fish fry|fried fish,coastal,pan,dish,piece,piece:80,,20,6,11,8
+fish-tikka,Fish Tikka,,punjabi,north,dish,piece,piece:35,,20,4,7,3
+prawn-curry,Prawn Curry,jhinga curry|kolambi curry,coastal,pan,dish,katori,,1,13,5,8,5
+chingri-malai-curry,Chingri Malai Curry,prawn malai curry,bengali,east,dish,katori,,1,11,5,13,5
+prawn-fry,Prawns Fry,prawn fry|prawns roast,coastal,pan,dish,katori,,0.7,20,6,10,8
+egg-curry,Egg Curry,anda curry|egg masala,north_indian,pan,dish,katori,,1,8,5,10,6
+egg-roast,Kerala Egg Roast,mutta roast,kerala,south,dish,katori,,0.95,8,6,11,8
+boiled-egg,Boiled Egg,anda|ubla anda|egg|eggs,pan_indian,pan,dish,piece,piece:50,,12.6,1.1,10.6,0
+egg-white-boiled,Boiled Egg White,egg white,pan_indian,pan,dish,piece,piece:33,,11,0.7,0.2,0
+omelette,Omelette,omlet|masala omelette|egg omelette,street,pan,dish,piece,piece:120,,11,2,15,6
+egg-white-omelette,Egg White Omelette,,continental,pan,dish,piece,piece:100,,10,1,3,2
+egg-bhurji,Egg Bhurji,anda bhurji|scrambled egg,street,pan,dish,katori,,0.75,12,3,14,6
+bread-omelette,Bread Omelette,,street,pan,dish,piece,piece:150,,10,22,12,5
+egg-roll,Egg Roll,anda roll|egg kathi roll,street,east,dish,piece,piece:180,,9,28,13,8
+poha,Poha,kanda poha|aval|pohe|batata poha,maharashtrian,west,dish,plate,scoop:120|plate:200,0.5,3,26,5,4.5
+upma,Upma,rava upma|uppittu|sooji upma,south_indian,south,dish,plate,scoop:120|plate:220,0.7,3.5,22,6,5
+sabudana-khichdi,Sabudana Khichdi,sago khichdi,maharashtrian,west,dish,katori,,0.6,2,38,8,6.5
+dalia,Dalia,daliya|broken wheat upma,north_indian,pan,dish,katori,,0.9,3.5,18,2,1.5
+oats-porridge,Oats Porridge (milk),oatmeal|oats with milk,continental,pan,dish,katori,,1,4.5,14,3.5,0
+masala-oats,Masala Oats,,continental,pan,dish,katori,,0.9,3.5,13,3,2
+cornflakes-milk,Cornflakes with Milk,,continental,pan,dish,katori,,0.6,4,24,2.5,0
+besan-chilla,Besan Chilla,besan cheela|pudla,north_indian,pan,dish,piece,piece:80,,9,20,8,6
+moong-chilla,Moong Dal Chilla,moong cheela,north_indian,pan,dish,piece,piece:80,,10,18,5,4
+oats-chilla,Oats Chilla,,north_indian,pan,dish,piece,piece:70,,8,25,6,4
+dhokla,Khaman Dhokla,dhokla|khaman,gujarati,west,dish,piece,piece:30,,6,22,5,3
+khandvi,Khandvi,,gujarati,west,dish,piece,piece:20,,6,15,7,5
+handvo,Handvo,,gujarati,west,dish,piece,piece:100,,6,25,8,6
+muthia,Muthia,methi muthia|dudhi muthia,gujarati,west,dish,piece,piece:30,,6,28,8,6
+appe,Appe,paniyaram|kuzhi paniyaram|guliyappa,south_indian,south,dish,piece,piece:25,,4,26,5,3
+samosa,Samosa,samose|singhara,street,pan,dish,piece,piece:80,,5,32,17,15
+kachori,Kachori,khasta kachori|pyaaz kachori,street,north,dish,piece,piece:60,,6,40,22,20
+pakora,Pakora,pakoda|bhajji|bhajiya|onion bhaji|kanda bhaji,street,pan,dish,piece,piece:20,,6,25,18,16
+paneer-pakora,Paneer Pakora,,street,north,dish,piece,piece:35,,11,15,20,14
+mirchi-bajji,Mirchi Bajji,mirchi vada,street,pan,dish,piece,piece:50,,4,22,15,13
+bread-pakora,Bread Pakora,,street,north,dish,piece,piece:90,,6,30,15,13
+aloo-tikki,Aloo Tikki,tikki,street,north,dish,piece,piece:60,,3,25,9,8
+batata-vada,Batata Vada,aloo bonda|bonda,street,west,dish,piece,piece:70,,4,28,12,10
+vada-pav,Vada Pav,wada pav,street,west,dish,piece,piece:150,,6,38,12,10
+sabudana-vada,Sabudana Vada,,maharashtrian,west,dish,piece,piece:50,,3,40,15,13
+fafda,Fafda,,gujarati,west,dish,piece,piece:15,,12,45,30,26
+methi-gota,Methi na Gota,gota,gujarati,west,dish,piece,piece:20,,8,30,20,18
+veg-cutlet,Veg Cutlet,cutlet,street,pan,dish,piece,piece:60,,4,25,10,8
+dabeli,Dabeli,,gujarati,west,dish,piece,piece:130,,5,35,10,6
+ragda-pattice,Ragda Pattice,ragda,street,west,dish,plate,scoop:120|plate:250,,4.5,20,6,4.5
+pani-puri,Pani Puri,golgappa|puchka|gol gappe|gupchup,street,pan,dish,piece,piece:18,,3,25,7,6
+sev-puri,Sev Puri,,street,west,dish,plate,scoop:60|plate:120,,5,32,14,10
+bhel-puri,Bhel Puri,bhel,street,west,dish,plate,scoop:75|plate:150,,4,30,7,4
+dahi-puri,Dahi Puri,,street,west,dish,piece,piece:25,,4,22,7,4
+papdi-chaat,Papdi Chaat,,street,north,dish,plate,scoop:75|plate:150,,5,27,9,6
+aloo-chaat,Aloo Chaat,,street,north,dish,katori,,0.6,2,22,8,7
+dahi-vada,Dahi Vada,dahi bhalla|thayir vadai|perugu vada,street,north,dish,piece,piece:90,,5,16,6,3
+jhal-muri,Jhal Muri,murmura mix|puffed rice chaat,street,east,dish,katori,,0.2,6,70,7,5
+corn-chaat,Corn Chaat,masala corn|sweet corn cup,street,pan,dish,katori,,0.7,3,19,3,1.5
+chana-chaat,Chana Chaat,boiled chana|chickpea salad,street,pan,dish,katori,,0.7,7,20,3,1.5
+sprouts-chaat,Sprouts Chaat,moong sprouts salad|sprouts salad,street,pan,dish,katori,,0.6,7,15,1.5,0
+chana-sundal,Chana Sundal,sundal,south_indian,south,dish,katori,,0.6,8,20,4,3
+bhutta,Bhutta,corn on the cob|roasted corn|butta,street,pan,dish,piece,piece:150,,3.3,19,1.4,0
+veg-momos,Veg Momos (steamed),momos|momo|veg momo,tibetan,pan,dish,piece,piece:25,,4,24,3,1
+fried-momos,Fried Momos,,tibetan,pan,dish,piece,piece:25,,5,26,12,10
+spring-roll,Veg Spring Roll,spring roll,indo_chinese,pan,dish,piece,piece:50,,4,28,14,12
+veg-manchurian-dry,Veg Manchurian (dry),gobi manchurian|manchurian,indo_chinese,pan,dish,piece,piece:25,,3.5,20,12,10
+veg-manchurian-gravy,Veg Manchurian (gravy),,indo_chinese,pan,dish,katori,,0.95,3,14,8,6
+honey-chilli-potato,Honey Chilli Potato,,indo_chinese,pan,dish,katori,,0.5,3,35,12,10
+veg-chowmein,Veg Chowmein,chow mein|noodles,indo_chinese,pan,dish,plate,scoop:120|plate:250,0.6,3.5,25,6,5
+hakka-noodles,Hakka Noodles,chilli garlic noodles,indo_chinese,pan,dish,plate,scoop:120|plate:250,0.6,3.5,26,5.5,5
+maggi,Maggi Noodles,instant noodles|maggi,continental,pan,dish,plate,scoop:100|plate:200,0.6,3,20,7,5
+manchow-soup,Veg Manchow Soup,manchow soup,indo_chinese,pan,dish,katori,,1,1.5,7,2,1.5
+sweet-corn-soup,Sweet Corn Soup,,indo_chinese,pan,dish,katori,,1,1.5,10,1,0.5
+paneer-kathi-roll,Paneer Kathi Roll,paneer frankie|paneer roll,street,pan,dish,piece,piece:200,,9,27,12,7
+veg-frankie,Veg Frankie,frankie|veg roll,street,west,dish,piece,piece:180,,5,30,9,6
+veg-sandwich,Veg Sandwich,sandwich|bombay sandwich,street,pan,dish,piece,piece:150,,5.5,25,6,0
+grilled-sandwich,Grilled Cheese Sandwich,cheese sandwich|grilled sandwich,street,pan,dish,piece,piece:160,,8,27,11,0
+bread-butter,Bread Butter,butter toast|toast,continental,pan,dish,piece,piece:30,,7,42,14,0
+veg-burger,Veg Burger,aloo tikki burger|burger,continental,pan,dish,piece,piece:150,,6,32,10,6
+pizza-slice,Veg Pizza (slice),pizza,continental,pan,dish,piece,piece:100,,10,30,10,0
+pasta-red,Pasta (red sauce),pasta|arrabbiata,continental,pan,dish,plate,scoop:120|plate:250,0.7,5,25,4,3
+pasta-white,Pasta (white sauce),alfredo pasta,continental,pan,dish,plate,scoop:120|plate:250,0.7,6,22,9,4
+french-fries,French Fries,fries|finger chips,continental,pan,dish,katori,,0.35,3.4,41,15,14
+roasted-makhana,Roasted Makhana,fox nuts|phool makhana|makhana,snack,pan,dish,katori,,0.1,9,70,6,5
+roasted-chana,Roasted Chana,bhuna chana|bhuna chana dal,snack,pan,dish,katori,,0.55,19,58,5,0
+roasted-peanuts,Roasted Peanuts,moongphali|singdana|peanuts|groundnuts,snack,pan,dish,katori,,0.55,26,16,49,0
+mathri,Mathri,,snack,north,dish,piece,piece:15,,7,52,28,24
+namkeen-mixture,Namkeen Mixture,mixture|chivda|farsan|namkeen,snack,pan,dish,katori,,0.4,12,45,35,30
+aloo-bhujia,Aloo Bhujia,bhujia sev|sev|bhujia,snack,pan,dish,katori,,0.35,13,45,35,30
+banana-chips,Banana Chips,kele ke chips|nendran chips,kerala,south,dish,katori,,0.35,2.3,58,34,30
+khakhra,Khakhra,,gujarati,west,dish,piece,piece:20,,12,60,10,6
+murukku,Murukku,chakli,south_indian,south,dish,piece,piece:20,,8,55,26,22
+papad-roasted,Papad (roasted),papadum|appalam|papad,snack,pan,dish,piece,piece:12,,25,58,3,0
+papad-fried,Papad (fried),,snack,pan,dish,piece,piece:15,,20,45,25,22
+green-salad,Green Salad,salad,salad,pan,dish,katori,,0.4,1.2,5,0.2,0
+kachumber,Kachumber Salad,kachumber,salad,pan,dish,katori,,0.5,1,5,2,0
+curd,Curd,dahi|yogurt|thayir|mosaru|doi,dairy,pan,dish,katori,,1.03,3.5,4.5,3.5,0
+greek-yogurt,Greek Yogurt (plain),hung curd,dairy,pan,dish,katori,,1.1,9,4,3,0
+mishti-doi,Mishti Doi,sweet curd,bengali,east,dish,katori,,1.05,4,20,4,0
+boondi-raita,Boondi Raita,raita,north_indian,pan,dish,katori,,1,3.5,8,5,1.5
+cucumber-raita,Cucumber Raita,kheera raita,north_indian,pan,dish,katori,,1,2.8,4.5,3,0
+coconut-chutney,Coconut Chutney,nariyal chutney|thengai chutney,south_indian,south,dish,tbsp,tbsp:20,,3,8,18,3
+green-chutney,Green Chutney,pudina chutney|hari chutney|dhaniya chutney,north_indian,pan,dish,tbsp,tbsp:15,,2,8,1,0
+tomato-chutney,Tomato Chutney,thakkali chutney,south_indian,south,dish,tbsp,tbsp:18,,1.5,10,5,4
+peanut-chutney,Peanut Chutney,shengdana chutney|groundnut chutney,south_indian,south,dish,tbsp,tbsp:18,,9,10,22,4
+imli-chutney,Imli Chutney,saunth|tamarind chutney|meethi chutney,north_indian,pan,dish,tbsp,tbsp:20,,0.5,55,0.2,0
+achar,Pickle (achar),achaar|mango pickle|aam ka achar|pickle,condiment,pan,dish,tbsp,tbsp:15,,1,5,15,14
+gulab-jamun,Gulab Jamun,gulabjamun,sweets,pan,dish,piece,piece:50,,4,50,12,10
+rasgulla,Rasgulla,rasagola|roshogolla,bengali,east,dish,piece,piece:50,,4,38,2,0
+rasmalai,Rasmalai,ras malai,bengali,east,dish,piece,piece:60,,6,25,8,0
+sandesh,Sandesh,,bengali,east,dish,piece,piece:30,,10,38,9,0
+jalebi,Jalebi,jilebi,sweets,pan,dish,piece,piece:30,,2,60,15,13
+malpua,Malpua,,sweets,north,dish,piece,piece:50,,5,45,18,14
+rice-kheer,Rice Kheer,kheer|payesh|chawal ki kheer,sweets,pan,dish,katori,,1.05,4,20,4.5,0
+phirni,Phirni,firni,mughlai,north,dish,katori,,1.05,4,22,5,0
+payasam,Semiya Payasam,vermicelli kheer|seviyan|payasam|sewai,south_indian,south,dish,katori,,1.05,3.5,24,5,1.5
+sweet-pongal,Sweet Pongal,sakkarai pongal,south_indian,south,dish,katori,,1,4,40,9,6
+gajar-halwa,Gajar ka Halwa,gajar halwa|carrot halwa,sweets,north,dish,katori,,1,4,30,12,8
+sooji-halwa,Sooji Halwa,sheera|rava kesari|suji halwa|kesari bath,sweets,pan,dish,katori,,0.9,3.5,42,15,12
+moong-dal-halwa,Moong Dal Halwa,,sweets,north,dish,katori,,0.9,6,40,22,18
+shrikhand,Shrikhand,,maharashtrian,west,dish,katori,,1.1,6,38,8,0
+besan-ladoo,Besan Ladoo,besan laddu|ladoo,sweets,pan,dish,piece,piece:35,,8,50,27,22
+motichoor-ladoo,Motichoor Ladoo,boondi ladoo,sweets,pan,dish,piece,piece:35,,5,58,18,14
+kaju-katli,Kaju Katli,kaju barfi,sweets,pan,dish,piece,piece:15,,10,50,25,0
+milk-barfi,Milk Barfi,barfi|burfi,sweets,pan,dish,piece,piece:30,,9,48,16,0
+peda,Peda,doodh peda,sweets,pan,dish,piece,piece:20,,10,55,12,0
+mysore-pak,Mysore Pak,,karnataka,south,dish,piece,piece:30,,6,45,35,28
+kulfi,Kulfi,malai kulfi,sweets,north,dish,piece,piece:60,,5,28,12,0
+modak,Ukadiche Modak,modak,maharashtrian,west,dish,piece,piece:40,,3,45,8,3
+gujiya,Gujiya,karanji,sweets,north,dish,piece,piece:40,,6,48,25,20
+chikki,Peanut Chikki,chikki|gajak,sweets,west,dish,piece,piece:25,,13,55,25,0
+ice-cream,Ice Cream (vanilla),ice cream,dessert,pan,dish,scoop,scoop:65,,3.5,24,11,0
+falooda,Falooda,,dessert,pan,dish,glass,glass:300,,3,22,4,0
+sponge-cake,Cake (slice),cake|pastry,dessert,pan,dish,piece,piece:60,,5,52,18,0
+sweet-lassi,Sweet Lassi,lassi,punjabi,north,dish,glass,glass:260,,3,14,3,0
+salted-lassi,Salted Lassi,namkeen lassi,punjabi,north,dish,glass,glass:260,,3,4.5,2.5,0
+chaas,Chaas,buttermilk|mattha|majjige|moru,pan_indian,pan,dish,glass,glass:250,,1.5,2.5,1,0
+toned-milk,Milk (toned),milk|doodh,dairy,pan,dish,glass,glass:250,,3.1,4.7,3,0
+full-cream-milk,Milk (full cream),full fat milk,dairy,pan,dish,glass,glass:250,,3.2,4.8,6,0
+masala-chai,Masala Chai,chai|tea|cutting chai|adrak chai,beverage,pan,dish,glass,glass:150,,1.8,8,1.8,0
+black-coffee,Black Coffee,americano,beverage,pan,dish,glass,glass:200,,0.1,0,0,0
+milk-coffee,Coffee with Milk,coffee|nescafe,beverage,pan,dish,glass,glass:180,,2,7,2,0
+filter-coffee,Filter Coffee,kaapi|south indian coffee,south_indian,south,dish,glass,glass:150,,2.4,8,2.5,0
+cold-coffee,Cold Coffee,,beverage,pan,dish,glass,glass:300,,3,13,3.5,0
+badam-milk,Badam Milk,almond milk shake,beverage,pan,dish,glass,glass:250,,4,14,5,0
+haldi-doodh,Haldi Doodh,turmeric milk|golden milk,beverage,pan,dish,glass,glass:250,,3.2,7,3,0
+mango-shake,Mango Shake,mango milkshake,beverage,pan,dish,glass,glass:300,,3,17,3,0
+banana-shake,Banana Shake,banana milkshake,beverage,pan,dish,glass,glass:300,,3.2,17,2.8,0
+sattu-drink,Sattu Sharbat,sattu|sattu drink,bihari,east,dish,glass,glass:250,,2.5,7,0.6,0
+sugarcane-juice,Sugarcane Juice,ganne ka ras,beverage,pan,dish,glass,glass:250,,0.2,18,0.1,0
+nimbu-pani,Nimbu Pani (sweet),lemonade|shikanji|lemon water,beverage,pan,dish,glass,glass:250,,0.1,8,0,0
+coconut-water,Coconut Water,nariyal pani|tender coconut,beverage,pan,dish,glass,glass:250,,0.7,4,0.2,0
+fresh-juice,Fresh Fruit Juice,orange juice|mosambi juice|juice,beverage,pan,dish,glass,glass:250,,0.7,10,0.2,0
+white-bread,White Bread (slice),bread|double roti,packaged,pan,packaged,piece,piece:25,,8.5,49,3,0
+brown-bread,Brown Bread (slice),whole wheat bread,packaged,pan,packaged,piece,piece:27,,10,43,3.5,0
+marie-biscuit,Marie Biscuit,marie,packaged,pan,packaged,piece,piece:7,,7,77,11,0
+glucose-biscuit,Glucose Biscuit,parle g|biscuit,packaged,pan,packaged,piece,piece:6,,7,77,13,0
+rusk,Rusk,toast rusk,packaged,pan,packaged,piece,piece:12,,11,70,8,0
+milk-chocolate,Milk Chocolate,dairy milk|chocolate,packaged,pan,packaged,piece,piece:13,,7,57,30,0
+cola,Cola (soft drink),coke|pepsi|cold drink|soft drink,packaged,pan,packaged,glass,glass:300,,0,10.6,0,0
+whey-protein,Whey Protein,protein shake|whey|protein powder|protein scoop,supplement,pan,packaged,scoop,scoop:32,,78,8,5,0
+peanut-butter,Peanut Butter,,packaged,pan,packaged,tbsp,tbsp:16,,25,20,50,0
+cheese-slice,Cheese Slice,processed cheese|cheese,packaged,pan,packaged,piece,piece:20,,20,4,25,0
+cornflakes,Cornflakes,corn flakes,packaged,pan,packaged,katori,,0.12,7,84,0.9,0
+muesli,Muesli,granola,packaged,pan,packaged,katori,,0.35,9,66,6,0
+paneer,Paneer,cottage cheese|raw paneer,dairy,pan,ingredient,g,piece:25,,18,3.5,20,0
+tofu,Tofu,,ingredient,pan,ingredient,g,piece:30,,12,2,6,0
+chicken-breast-raw,Chicken Breast (raw),,ingredient,pan,ingredient,g,,,23,0,2.6,0
+soya-chunks-dry,Soya Chunks (dry),meal maker dry|nutrela dry,ingredient,pan,ingredient,g,,,52,33,0.5,0
+oats-raw,Oats (raw),rolled oats,ingredient,pan,ingredient,g,,,13,66,7,0
+moong-sprouts,Moong Sprouts,sprouted moong,ingredient,pan,ingredient,katori,,0.55,3,6,0.2,0
+boiled-potato,Boiled Potato,ubla aloo|aloo|potato,ingredient,pan,ingredient,piece,piece:150,,2,17,0.1,0
+rice-raw,Rice (raw),basmati rice raw|uncooked rice,ingredient,pan,ingredient,g,,,7,78,0.5,0
+wheat-atta,Wheat Atta,whole wheat flour|aata,ingredient,pan,ingredient,g,,,12,69,1.7,0
+besan,Besan,gram flour|chickpea flour,ingredient,pan,ingredient,g,,,22,58,6.5,0
+ghee,Ghee,desi ghee,ingredient,pan,ingredient,tbsp,tbsp:13,0.91,0,0,99.8,0
+butter,Butter,makhan|amul butter,ingredient,pan,ingredient,tbsp,tbsp:14,,0.5,0.5,81,0
+cooking-oil,Cooking Oil,oil|tel|refined oil|mustard oil|sarson tel,ingredient,pan,ingredient,tbsp,tbsp:14,0.92,0,0,100,0
+sugar,Sugar,cheeni|shakkar,ingredient,pan,ingredient,tbsp,tbsp:12,,0,100,0,0
+jaggery,Jaggery,gur|gud,ingredient,pan,ingredient,piece,piece:10,,0.4,95,0.1,0
+honey,Honey,shahad,ingredient,pan,ingredient,tbsp,tbsp:21,,0.3,82,0,0
+almonds,Almonds,badam,ingredient,pan,ingredient,piece,piece:1.2,,21,22,50,0
+cashews,Cashews,kaju,ingredient,pan,ingredient,piece,piece:1.5,,18,30,44,0
+walnuts,Walnuts,akhrot,ingredient,pan,ingredient,piece,piece:4,,15,14,62,0
+fresh-coconut,Fresh Coconut,nariyal,ingredient,pan,ingredient,g,,,3.3,15,33,0
+cucumber,Cucumber,kheera|kakdi,ingredient,pan,ingredient,piece,piece:150,,0.7,3.6,0.1,0
+onion,Onion,pyaaz|kanda,ingredient,pan,ingredient,piece,piece:100,,1.1,9,0.1,0
+tomato,Tomato,tamatar,ingredient,pan,ingredient,piece,piece:90,,0.9,3.9,0.2,0
+carrot,Carrot,gajar,ingredient,pan,ingredient,piece,piece:70,,0.9,9.6,0.2,0
+banana,Banana,kela,fruit,pan,ingredient,piece,piece:100,,1.1,23,0.3,0
+apple,Apple,seb,fruit,pan,ingredient,piece,piece:150,,0.3,14,0.2,0
+mango,Mango,aam,fruit,pan,ingredient,piece,piece:200,,0.8,15,0.4,0
+papaya,Papaya,papita,fruit,pan,ingredient,katori,,0.6,0.5,11,0.3,0
+orange,Orange,santra|narangi,fruit,pan,ingredient,piece,piece:130,,0.9,12,0.1,0
+guava,Guava,amrood|peru,fruit,pan,ingredient,piece,piece:150,,2.6,14,1,0
+watermelon,Watermelon,tarbooz,fruit,pan,ingredient,katori,,0.6,0.6,7.5,0.2,0
+grapes,Grapes,angoor,fruit,pan,ingredient,katori,,0.6,0.7,17,0.2,0
+pomegranate,Pomegranate,anar,fruit,pan,ingredient,katori,,0.7,1.7,19,1.2,0
+chikoo,Chikoo,sapota|chiku,fruit,pan,ingredient,piece,piece:100,,0.4,20,1.1,0
+pineapple,Pineapple,ananas,fruit,pan,ingredient,katori,,0.6,0.5,13,0.1,0
+dates,Dates,khajoor,fruit,pan,ingredient,piece,piece:8,,2.5,75,0.4,0

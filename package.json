@@ -31,8 +31,11 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "@types/node": "^26.6.5",
     "@types/react": "~19.2.2",
     "prettier": "^3.9.10",
+    "supabase": "^2.121.0",
     "tailwindcss": "^3.4.19",
     "typescript": "~6.0.3",
     "vitest": "^5.0.4"
@@ -43,7 +46,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "build:web": "expo export --platform web",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "seed:build": "node scripts/build-seed.mjs"
   },
   "private": true
 }
