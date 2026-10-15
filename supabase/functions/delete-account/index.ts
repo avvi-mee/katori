@@ -1,6 +1,6 @@
 // delete-account: stops billing, removes every photo in the user's folder, then deletes the auth user.
-// All rows (profile, meals, items, usual, coach messages, usage, subscription, drafts, push) cascade
-// from auth.users via ON DELETE CASCADE.
+// All rows (profile, meals, items, usual, coach messages, usage, subscription, drafts, push, and the
+// Phase 1B training/activity/habit/body tables) cascade from auth.users via ON DELETE CASCADE.
 import { cancelSubscription } from '../_shared/billing.ts';
 import { adminClient, json, requireUser, serve } from '../_shared/http.ts';
 
@@ -20,13 +20,15 @@ serve(async (req) => {
     );
   }
 
-  const bucket = admin.storage.from('meal-photos');
-  for (let guard = 0; guard < 100; guard++) {
-    const { data: files, error } = await bucket.list(user.id, { limit: 1000 });
-    if (error) throw error;
-    if (!files?.length) break;
-    const { error: rmError } = await bucket.remove(files.map((f) => `${user.id}/${f.name}`));
-    if (rmError) throw rmError;
+  for (const name of ['meal-photos', 'body-photos']) {
+    const bucket = admin.storage.from(name);
+    for (let guard = 0; guard < 100; guard++) {
+      const { data: files, error } = await bucket.list(user.id, { limit: 1000 });
+      if (error) throw error;
+      if (!files?.length) break;
+      const { error: rmError } = await bucket.remove(files.map((f) => `${user.id}/${f.name}`));
+      if (rmError) throw rmError;
+    }
   }
 
   const { error } = await admin.auth.admin.deleteUser(user.id);

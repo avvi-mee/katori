@@ -7,6 +7,9 @@ const B = '00000000-0000-4000-8000-00000000000b';
 
 let db: Db;
 let foodId: string;
+const workoutOf: Record<string, string> = {};
+const habitOf: Record<string, string> = {};
+const templateOf: Record<string, string> = {};
 
 beforeAll(async () => {
   db = await createDb();
@@ -50,7 +53,47 @@ beforeAll(async () => {
       `https://push.example/${uid}`,
     ]);
     await db.query(`insert into storage.objects (bucket_id, name) values ('meal-photos', $1)`, [`${uid}/photo.jpg`]);
+
+    // Phase 1B tables
+    const ex = await db.query<{ id: string }>(
+      `insert into exercises (name, source, owner_id) values ('My curl', 'custom', $1) returning id`,
+      [uid],
+    );
+    const tpl = await db.query<{ id: string }>(
+      `insert into workout_templates (owner_id, name, split) values ($1, 'My push', 'custom') returning id`,
+      [uid],
+    );
+    templateOf[uid] = tpl.rows[0]!.id;
+    await db.query(`insert into template_exercises (template_id, position, exercise_id) values ($1, 0, $2)`, [
+      tpl.rows[0]!.id,
+      ex.rows[0]!.id,
+    ]);
+    const w = await db.query<{ id: string }>(`insert into workouts (user_id, name) values ($1, 'Push') returning id`, [
+      uid,
+    ]);
+    workoutOf[uid] = w.rows[0]!.id;
+    await db.query(`insert into workout_sets (workout_id, exercise_id, set_no, kg, reps) values ($1, $2, 1, 20, 10)`, [
+      w.rows[0]!.id,
+      ex.rows[0]!.id,
+    ]);
+    await db.query(
+      `insert into personal_records (user_id, exercise_id, kind, value, workout_id) values ($1, $2, 'weight', 20, $3)`,
+      [uid, ex.rows[0]!.id, w.rows[0]!.id],
+    );
+    await db.query(`insert into activity_days (user_id, date, steps) values ($1, current_date, 8000)`, [uid]);
+    await db.query(`insert into runs (user_id, distance_m, duration_s) values ($1, 5000, 1800)`, [uid]);
+    const h = await db.query<{ id: string }>(
+      `insert into habits (user_id, kind, name) values ($1, 'water', 'Water') returning id`,
+      [uid],
+    );
+    habitOf[uid] = h.rows[0]!.id;
+    await db.query(`insert into habit_logs (habit_id, value) values ($1, 250)`, [h.rows[0]!.id]);
+    await db.query(`insert into goals (user_id, primary_goal, steps) values ($1, 'fat_loss', 10000)`, [uid]);
+    await db.query(`insert into body_logs (user_id, date, waist_cm) values ($1, current_date, 80)`, [uid]);
+    await db.query(`insert into storage.objects (bucket_id, name) values ('body-photos', $1)`, [`${uid}/front.jpg`]);
   }
+  await db.query(`insert into exercises (slug, name, source) values ('lib_test_row', 'Library row', 'katori')`);
+  await db.query(`insert into workout_templates (name, split) values ('Library PPL', 'ppl')`);
   await db.query(`insert into ai_cache (key, payload) values ('dal|katori|1', '{}')`);
 });
 
@@ -64,6 +107,13 @@ const OWNED = [
   { table: 'subscriptions', owner: 'user_id' },
   { table: 'meal_drafts', owner: 'user_id' },
   { table: 'push_subscriptions', owner: 'user_id' },
+  { table: 'workouts', owner: 'user_id' },
+  { table: 'personal_records', owner: 'user_id' },
+  { table: 'activity_days', owner: 'user_id' },
+  { table: 'runs', owner: 'user_id' },
+  { table: 'habits', owner: 'user_id' },
+  { table: 'goals', owner: 'user_id' },
+  { table: 'body_logs', owner: 'user_id' },
 ];
 
 describe('RLS', () => {
@@ -193,7 +243,8 @@ describe('RLS', () => {
     const names = await asUser(
       db,
       A,
-      async (tx) => (await tx.query<{ name: string }>(`select name from storage.objects`)).rows,
+      async (tx) =>
+        (await tx.query<{ name: string }>(`select name from storage.objects where bucket_id = 'meal-photos'`)).rows,
     );
     expect(names.map((r) => r.name)).toEqual([`${A}/photo.jpg`]);
     await expect(
@@ -244,5 +295,163 @@ describe('RLS', () => {
     expect(rows[0]?.name).toMatch(/Roti/);
     const typo = await db.query<{ name: string }>(`select name from match_food_item('dal tadkaa')`);
     expect(typo.rows[0]?.name).toBe('Dal Tadka');
+  });
+});
+
+describe('RLS: Phase 1B training, activity, habits, goals, body', () => {
+  const C = '00000000-0000-4000-8000-0000000000c1';
+
+  it('exercises: library rows + own custom rows only', async () => {
+    const rows = await asUser(
+      db,
+      A,
+      async (tx) => (await tx.query<{ owner_id: string | null }>(`select owner_id from exercises`)).rows,
+    );
+    expect(rows.some((r) => r.owner_id === null)).toBe(true);
+    expect(rows.filter((r) => r.owner_id !== null).every((r) => r.owner_id === A)).toBe(true);
+    expect(rows.filter((r) => r.owner_id === A)).toHaveLength(1);
+  });
+
+  it('exercises: users cannot add or edit library rows, only their own custom ones', async () => {
+    await expect(
+      asUser(db, A, (tx) => tx.query(`insert into exercises (name, source) values ('Fake lib', 'katori')`)),
+    ).rejects.toThrow(/row-level security|custom_has_owner/);
+    await expect(
+      asUser(db, A, (tx) =>
+        tx.query(`insert into exercises (name, source, owner_id) values ('Theirs', 'custom', '${B}')`),
+      ),
+    ).rejects.toThrow(/row-level security/);
+    const lib = await asUser(db, A, (tx) => tx.query(`update exercises set name = 'x' where owner_id is null`));
+    expect(lib.affectedRows ?? 0).toBe(0);
+    const own = await asUser(db, A, (tx) =>
+      tx.query(`insert into exercises (name, source, owner_id) values ('Band pull', 'custom', '${A}')`),
+    );
+    expect(own.affectedRows).toBe(1);
+  });
+
+  it('workout_templates + template_exercises: library and own only, own writes only', async () => {
+    const tpls = await asUser(
+      db,
+      A,
+      async (tx) => (await tx.query<{ owner_id: string | null }>(`select owner_id from workout_templates`)).rows,
+    );
+    expect(tpls.some((r) => r.owner_id === null)).toBe(true);
+    expect(tpls.filter((r) => r.owner_id !== null).every((r) => r.owner_id === A)).toBe(true);
+    const te = await asUser(
+      db,
+      B,
+      async (tx) =>
+        (
+          await tx.query<{ owner_id: string | null }>(
+            `select t.owner_id from template_exercises te join workout_templates t on t.id = te.template_id`,
+          )
+        ).rows,
+    );
+    expect(te.every((r) => r.owner_id === null || r.owner_id === B)).toBe(true);
+    await expect(
+      asUser(db, A, (tx) => tx.query(`insert into workout_templates (owner_id, name) values (null, 'Sneaky lib')`)),
+    ).rejects.toThrow(/row-level security/);
+    await expect(
+      asUser(db, A, (tx) =>
+        tx.query(
+          `insert into template_exercises (template_id, position, exercise_id)
+           select '${templateOf[B]}', 9, id from exercises where owner_id is null limit 1`,
+        ),
+      ),
+    ).rejects.toThrow(/row-level security/);
+  });
+
+  it("workout_sets: visible only through own workouts; cannot add sets to someone else's workout", async () => {
+    const n = await asUser(db, A, async (tx) => (await tx.query(`select 1 from workout_sets`)).rows.length);
+    expect(n).toBe(1);
+    await expect(
+      asUser(db, A, (tx) =>
+        tx.query(
+          `insert into workout_sets (workout_id, exercise_id, set_no, kg, reps)
+           select '${workoutOf[B]}', id, 2, 50, 5 from exercises where owner_id is null limit 1`,
+        ),
+      ),
+    ).rejects.toThrow(/row-level security/);
+    const own = await asUser(db, A, (tx) =>
+      tx.query(
+        `insert into workout_sets (workout_id, exercise_id, set_no, kg, reps)
+         select '${workoutOf[A]}', id, 2, 50, 5 from exercises where owner_id is null limit 1`,
+      ),
+    );
+    expect(own.affectedRows).toBe(1);
+  });
+
+  it('workouts / runs / activity / goals / body: cannot write rows for another user', async () => {
+    for (const sql of [
+      `insert into workouts (user_id) values ('${B}')`,
+      `insert into runs (user_id, distance_m, duration_s) values ('${B}', 1000, 600)`,
+      `insert into activity_days (user_id, date, steps) values ('${B}', current_date - 1, 100)`,
+      `insert into goals (user_id) values ('${C}')`,
+      `insert into body_logs (user_id, date) values ('${B}', current_date - 1)`,
+      `insert into habits (user_id, kind, name) values ('${B}', 'custom', 'x')`,
+    ])
+      await expect(asUser(db, A, (tx) => tx.query(sql))).rejects.toThrow(/row-level security/);
+    const upd = await asUser(db, A, (tx) => tx.query(`update goals set steps = 1 where user_id = '${B}'`));
+    expect(upd.affectedRows ?? 0).toBe(0);
+  });
+
+  it("habit_logs: own habits only; cannot log against someone else's habit", async () => {
+    const n = await asUser(db, B, async (tx) => (await tx.query(`select 1 from habit_logs`)).rows.length);
+    expect(n).toBe(1);
+    await expect(
+      asUser(db, A, (tx) => tx.query(`insert into habit_logs (habit_id, value) values ('${habitOf[B]}', 1)`)),
+    ).rejects.toThrow(/row-level security/);
+  });
+
+  it('personal_records: users cannot write them (trigger only)', async () => {
+    await expect(
+      asUser(db, A, (tx) =>
+        tx.query(
+          `insert into personal_records (user_id, exercise_id, kind, value, workout_id)
+           select '${A}', id, 'weight', 999, '${workoutOf[A]}' from exercises where owner_id is null limit 1`,
+        ),
+      ),
+    ).rejects.toThrow(/row-level security/);
+  });
+
+  it('body-photos storage: own folder only', async () => {
+    const names = await asUser(
+      db,
+      A,
+      async (tx) =>
+        (await tx.query<{ name: string }>(`select name from storage.objects where bucket_id = 'body-photos'`)).rows,
+    );
+    expect(names.map((r) => r.name)).toEqual([`${A}/front.jpg`]);
+    await expect(
+      asUser(db, A, (tx) =>
+        tx.query(`insert into storage.objects (bucket_id, name) values ('body-photos', '${B}/x.jpg')`),
+      ),
+    ).rejects.toThrow(/row-level security/);
+  });
+
+  it('profiles.preferences: users can update it, and it must be an object', async () => {
+    const ok = await asUser(db, A, (tx) =>
+      tx.query(`update profiles set preferences = '{"training_days":4}' where id = '${A}'`),
+    );
+    expect(ok.affectedRows).toBe(1);
+    await expect(
+      asUser(db, A, (tx) => tx.query(`update profiles set preferences = '[1]' where id = '${A}'`)),
+    ).rejects.toThrow(/preferences_is_object/);
+  });
+
+  it('deleting a user removes their training data, including custom exercises used in sets', async () => {
+    await createUser(db, C);
+    const ex = await db.query<{ id: string }>(
+      `insert into exercises (name, source, owner_id) values ('C move', 'custom', $1) returning id`,
+      [C],
+    );
+    const w = await db.query<{ id: string }>(`insert into workouts (user_id) values ($1) returning id`, [C]);
+    await db.query(`insert into workout_sets (workout_id, exercise_id, set_no, kg, reps) values ($1, $2, 1, 10, 10)`, [
+      w.rows[0]!.id,
+      ex.rows[0]!.id,
+    ]);
+    await db.query(`delete from auth.users where id = $1`, [C]);
+    const { rows } = await db.query(`select 1 from exercises where owner_id = $1`, [C]);
+    expect(rows).toHaveLength(0);
   });
 });

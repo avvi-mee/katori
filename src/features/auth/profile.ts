@@ -27,6 +27,8 @@ export type Profile = {
   locale: 'en' | 'hinglish';
   nudges_muted: boolean;
   onboarded_at: string | null;
+  /** Raw jsonb; read it with parsePreferences (src/types/preferences.ts). */
+  preferences?: Record<string, unknown>;
 };
 
 export type ProfileUpdate = Partial<Omit<Profile, 'id' | 'role'>>;
