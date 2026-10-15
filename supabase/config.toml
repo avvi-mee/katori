@@ -434,3 +434,7 @@ verify_jwt = false
 
 [functions.coach-message]
 verify_jwt = false
+
+# Called by Razorpay / Dodo; verifies the provider signature itself.
+[functions.payments-webhook]
+verify_jwt = false

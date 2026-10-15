@@ -19,6 +19,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Skeleton } from '@/components/Skeleton';
 import { ToastHost } from '@/components/Toast';
 import { ThemeProvider, useTheme } from '@/design/theme';
+import { useLiveEntitlement } from '@/features/billing/entitlement';
+import { ProCelebration } from '@/features/billing/ProCelebration';
 import { useProfile } from '@/features/auth/profile';
 import { useSession } from '@/features/auth/session';
 import { setLocale } from '@/lib/i18n';
@@ -90,9 +92,16 @@ function Shell() {
           <Stack.Screen name="dev/components" />
         </Stack>
       )}
+      {signedIn && onboarded ? <EntitlementWatcher /> : null}
       <ToastHost />
     </>
   );
+}
+
+/** Keeps the subscription row live (Realtime) and celebrates the moment Pro activates. */
+function EntitlementWatcher() {
+  useLiveEntitlement();
+  return <ProCelebration />;
 }
 
 /** Shown while the stored session and profile load. Never a spinner. */

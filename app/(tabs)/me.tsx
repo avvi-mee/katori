@@ -15,11 +15,14 @@ import { Text } from '@/components/Text';
 import { toast } from '@/components/Toast';
 import { useThemePref } from '@/design/theme';
 import { useProfile, useUpdateProfile, type ProfileUpdate } from '@/features/auth/profile';
+import { useEntitlement } from '@/features/billing/entitlement';
 import { signOut, useSession } from '@/features/auth/session';
 import { kcalText } from '@/features/meals/format';
 import { PERSONAS, personaMeta } from '@/features/personas/personas';
 import { SavageSwitch } from '@/features/personas/SavageSwitch';
+import { callFunction, errorText } from '@/lib/api';
 import { setLocale, t, useLocale, type Locale } from '@/lib/i18n';
+import { useQueryClient } from '@tanstack/react-query';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -39,6 +42,45 @@ export default function Me() {
   const update = useUpdateProfile();
   const { pref, setPref } = useThemePref();
   const [picking, setPicking] = useState(false);
+  const [confirm, setConfirm] = useState<'cancel' | 'delete' | null>(null);
+  const [busy, setBusy] = useState(false);
+  const { isPro, subscription } = useEntitlement();
+  const qc = useQueryClient();
+  const periodEnd = subscription?.current_period_end
+    ? new Date(subscription.current_period_end).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : '';
+
+  const cancel = async () => {
+    setBusy(true);
+    try {
+      await callFunction('cancel-subscription', {});
+      await qc.invalidateQueries({ queryKey: ['subscription'] });
+      toast({ message: t('me.cancelled') });
+      setConfirm(null);
+    } catch (e) {
+      toast({ message: errorText(e), tone: 'error' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const deleteAccount = async () => {
+    setBusy(true);
+    try {
+      await callFunction('delete-account', {});
+      setConfirm(null);
+      await signOut();
+      qc.clear();
+      toast({ message: t('me.deleted') });
+    } catch (e) {
+      toast({ message: errorText(e), tone: 'error' });
+      setBusy(false);
+    }
+  };
 
   const save = (patch: ProfileUpdate) =>
     update.mutate(patch, { onError: () => toast({ message: t('common.error'), tone: 'error' }) });
@@ -127,11 +169,65 @@ export default function Me() {
       </Section>
 
       <Section title={t('me.plan')}>
-        <Button label={t('me.upgrade')} size="md" onPress={() => router.push('/paywall?from=me')} />
+        {isPro && subscription ? (
+          <>
+            <View>
+              <Text variant="heading">
+                {t('me.proActive', {
+                  plan: subscription.plan === 'yearly' ? t('paywall.yearly') : t('paywall.monthly'),
+                })}
+              </Text>
+              {periodEnd ? (
+                <Text variant="caption">
+                  {subscription.cancel_at_period_end
+                    ? t('me.cancels', { date: periodEnd })
+                    : t('me.renews', { date: periodEnd })}
+                </Text>
+              ) : null}
+            </View>
+            {!subscription.cancel_at_period_end ? (
+              <Button label={t('me.cancel')} variant="secondary" size="md" onPress={() => setConfirm('cancel')} />
+            ) : null}
+          </>
+        ) : (
+          <>
+            {subscription?.status === 'halted' ? (
+              <Text variant="label" className="text-fat">
+                {t('me.halted')}
+              </Text>
+            ) : null}
+            <Text variant="heading">{t('me.free')}</Text>
+            <Button label={t('me.upgrade')} size="md" onPress={() => router.push('/paywall?from=me')} />
+          </>
+        )}
       </Section>
 
       <Text variant="caption">{t('me.privacy')}</Text>
       <Button label={t('me.signOut')} variant="secondary" onPress={signOut} />
+      <Button label={t('me.delete')} variant="danger" onPress={() => setConfirm('delete')} />
+
+      <Sheet
+        open={confirm !== null}
+        onClose={() => setConfirm(null)}
+        title={confirm === 'delete' ? t('me.deleteTitle') : t('me.cancelTitle')}
+      >
+        <Text variant="body" className="mb-6 text-ink-muted">
+          {confirm === 'delete' ? t('me.deleteBody') : t('me.cancelBody', { date: periodEnd })}
+        </Text>
+        <View className="gap-2">
+          <Button
+            label={confirm === 'delete' ? t('me.deleteConfirm') : t('me.cancelConfirm')}
+            variant="danger"
+            loading={busy}
+            onPress={confirm === 'delete' ? deleteAccount : cancel}
+          />
+          <Button
+            label={confirm === 'delete' ? t('common.cancel') : t('me.keep')}
+            variant="ghost"
+            onPress={() => setConfirm(null)}
+          />
+        </View>
+      </Sheet>
 
       <Sheet open={picking} onClose={() => setPicking(false)} title={t('onb.coach.title')}>
         <View className="gap-2">

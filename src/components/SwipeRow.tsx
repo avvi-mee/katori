@@ -6,6 +6,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { animateTo, duration, useReducedMotion } from '@/design/motion';
+import { useTheme } from '@/design/theme';
 
 const THRESHOLD = -90;
 
@@ -14,6 +15,7 @@ type Props = { children: ReactNode; onDelete: () => void; deleteLabel: string };
 /** Swipe left to delete. Screen readers get a "delete" action instead of the gesture. */
 export function SwipeRow({ children, onDelete, deleteLabel }: Props) {
   const reduced = useReducedMotion();
+  const { colors } = useTheme();
   const x = useSharedValue(0);
 
   const pan = Gesture.Pan()
@@ -42,10 +44,16 @@ export function SwipeRow({ children, onDelete, deleteLabel }: Props) {
     >
       <Animated.View
         style={[
-          { position: 'absolute', inset: 0, alignItems: 'flex-end', justifyContent: 'center', paddingRight: 24 },
+          {
+            position: 'absolute',
+            inset: 0,
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            paddingRight: 24,
+            backgroundColor: colors.fat,
+          },
           binStyle,
         ]}
-        className="bg-fat"
       >
         <Trash2 color="#FFFFFF" size={22} />
       </Animated.View>
