@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react-native';
+import { Plus } from '@/components/icons';
 import { ScrollView, View } from 'react-native';
 
 import { PressableScale } from '@/components/PressableScale';
@@ -40,7 +40,7 @@ export function UsualRow() {
       {
         onSuccess: (res) =>
           toast({
-            message: t('food.saved', { kcal: kcalText(res.kcal) }),
+            message: res.queued ? t('sync.savedOffline') : t('food.saved', { kcal: kcalText(res.kcal) }),
             tone: 'success',
             action: { label: t('common.undo'), onPress: () => del.mutate(res.meal_id) },
           }),

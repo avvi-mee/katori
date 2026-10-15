@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Image as ImageIcon, X } from 'lucide-react-native';
+import { Image as ImageIcon, X } from '@/components/icons';
 import { useEffect, useRef, useState } from 'react';
 import { ScrollView, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
@@ -13,6 +13,7 @@ import { toast } from '@/components/Toast';
 import { fonts } from '@/design/tokens';
 import { useReducedMotion } from '@/design/motion';
 import { MEAL_ORDER } from '@/features/meals/format';
+import { savePendingScan } from '@/features/scan/pendingScans';
 import { compressPhoto } from '@/features/scan/photo';
 import { useScan } from '@/features/scan/store';
 import { track } from '@/lib/analytics';
@@ -57,7 +58,16 @@ export default function Camera() {
     setBusy(true);
     try {
       const small = await compressPhoto(blob);
-      set({ photo: { blob: small, url: URL.createObjectURL(small) }, startedAt: Date.now() });
+      if (navigator.onLine === false) {
+        await savePendingScan({ blob: small, mealType, hint, takenAt: new Date().toISOString() });
+        toast({ message: t('scan.savedForLater'), tone: 'success' });
+        return router.replace('/');
+      }
+      set({
+        photo: { blob: small, url: URL.createObjectURL(small) },
+        startedAt: Date.now(),
+        takenAt: new Date().toISOString(),
+      });
       track('scan_started', {});
       router.replace('/scan/analyzing');
     } catch {

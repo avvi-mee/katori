@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Activity, Dumbbell, Flame, Repeat, CigaretteOff, Trophy } from 'lucide-react-native';
+import { Activity, Dumbbell, Flame, Repeat, CigaretteOff, Trophy } from '@/components/icons';
 
 import { OptionCard } from '@/components/OptionCard';
 import { useTheme } from '@/design/theme';

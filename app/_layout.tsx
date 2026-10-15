@@ -6,7 +6,7 @@ import { Manrope_400Regular } from '@expo-google-fonts/manrope/400Regular';
 import { Manrope_500Medium } from '@expo-google-fonts/manrope/500Medium';
 import { Manrope_600SemiBold } from '@expo-google-fonts/manrope/600SemiBold';
 import { Manrope_700Bold } from '@expo-google-fonts/manrope/700Bold';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -23,11 +23,15 @@ import { useLiveEntitlement } from '@/features/billing/entitlement';
 import { ProCelebration } from '@/features/billing/ProCelebration';
 import { useProfile } from '@/features/auth/profile';
 import { useSession } from '@/features/auth/session';
+import { startSync } from '@/features/meals/sync';
+import { InstallSheet } from '@/features/pwa/InstallSheet';
+import { registerServiceWorker } from '@/features/pwa/pwa';
+import { loadPendingScans } from '@/features/scan/pendingScans';
 import { setLocale } from '@/lib/i18n';
+import { loadOutbox } from '@/lib/outbox';
+import { persistOptions, queryClient } from '@/lib/query';
 
 SplashScreen.preventAutoHideAsync();
-
-const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 2 } } });
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -43,16 +47,18 @@ export default function RootLayout() {
     if (loaded || error) SplashScreen.hideAsync();
   }, [loaded, error]);
 
+  useEffect(registerServiceWorker, []);
+
   if (!loaded && !error) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
           <ThemeProvider>
             <Shell />
           </ThemeProvider>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
@@ -68,6 +74,14 @@ function Shell() {
   useEffect(() => {
     if (profile.data?.locale) setLocale(profile.data.locale);
   }, [profile.data?.locale]);
+
+  // Offline saves wait in the outbox; replay them whenever we're signed in and online.
+  useEffect(() => {
+    if (!signedIn) return;
+    void loadOutbox();
+    void loadPendingScans();
+    startSync(queryClient);
+  }, [signedIn]);
 
   const loading = !ready || (signedIn && profile.isPending);
 
@@ -101,7 +115,12 @@ function Shell() {
 /** Keeps the subscription row live (Realtime) and celebrates the moment Pro activates. */
 function EntitlementWatcher() {
   useLiveEntitlement();
-  return <ProCelebration />;
+  return (
+    <>
+      <ProCelebration />
+      <InstallSheet />
+    </>
+  );
 }
 
 /** Shown while the stored session and profile load. Never a spinner. */

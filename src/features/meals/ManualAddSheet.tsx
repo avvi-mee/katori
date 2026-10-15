@@ -1,4 +1,4 @@
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft } from '@/components/icons';
 import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
@@ -97,7 +97,10 @@ export function ManualAddSheet({ open, onClose, eatenAt }: Props) {
       },
       {
         onSuccess: (res) => {
-          toast({ message: t('food.saved', { kcal: kcalText(res.kcal) }), tone: 'success' });
+          toast({
+            message: res.queued ? t('sync.savedOffline') : t('food.saved', { kcal: kcalText(res.kcal) }),
+            tone: 'success',
+          });
           close();
         },
         onError: (e) => toast({ message: errorText(e), tone: 'error' }),

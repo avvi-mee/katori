@@ -1,5 +1,5 @@
 import type { Tabs } from 'expo-router';
-import { CircleUser, Sun, TrendingUp, UtensilsCrossed } from 'lucide-react-native';
+import { CircleUser, Sun, TrendingUp, UtensilsCrossed } from '@/components/icons';
 import type React from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

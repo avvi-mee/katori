@@ -1,4 +1,5 @@
 import { Redirect, router } from 'expo-router';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 
 import { Button } from '@/components/Button';
@@ -13,6 +14,7 @@ import { Text } from '@/components/Text';
 import { useTheme } from '@/design/theme';
 import { useProfile } from '@/features/auth/profile';
 import { formatAmount, kcalText } from '@/features/meals/format';
+import { maybeOfferInstall } from '@/features/pwa/pwa';
 import { useScan } from '@/features/scan/store';
 import type { PersonaId } from '@/features/personas/personas';
 import { t, useLocale } from '@/lib/i18n';
@@ -22,6 +24,11 @@ export default function Result() {
   const { colors } = useTheme();
   const { result, reset } = useScan();
   const { data: profile } = useProfile();
+  // The install prompt appears after the first successful scan (docs: Installable app).
+  useEffect(() => {
+    const id = setTimeout(maybeOfferInstall, 2500);
+    return () => clearTimeout(id);
+  }, []);
 
   if (!result) return <Redirect href="/" />;
 
@@ -41,6 +48,11 @@ export default function Result() {
       <Text variant="display" accessibilityRole="header">
         {t('scan.saved')}
       </Text>
+      {result.queued ? (
+        <View className="rounded-card bg-accent-soft p-4">
+          <Text variant="label">{t('sync.savedOffline')}</Text>
+        </View>
+      ) : null}
       <View className="items-center gap-3">
         {/* The ring springs from the total before this meal to the new total. */}
         <Ring

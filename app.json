@@ -18,7 +18,14 @@
       "backgroundColor": "#FAF7F2"
     },
     "plugins": [
-      "expo-router",
+      [
+        "expo-router",
+        {
+          "asyncRoutes": {
+            "web": true
+          }
+        }
+      ],
       "expo-font",
       [
         "expo-splash-screen",
@@ -26,7 +33,9 @@
           "backgroundColor": "#FAF7F2",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76,
-          "dark": { "backgroundColor": "#12100E" }
+          "dark": {
+            "backgroundColor": "#12100E"
+          }
         }
       ]
     ],

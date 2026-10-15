@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react-native';
+import { Trash2 } from '@/components/icons';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';

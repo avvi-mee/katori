@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Camera, List, Plus, Type } from 'lucide-react-native';
+import { Camera, List, Plus, Type } from '@/components/icons';
 import { useState } from 'react';
 import { View } from 'react-native';
 

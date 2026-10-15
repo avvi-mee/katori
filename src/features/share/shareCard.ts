@@ -1,6 +1,5 @@
 import type { RefObject } from 'react';
 import type { View } from 'react-native';
-import { captureRef } from 'react-native-view-shot';
 
 // shortcut: web share/download. Phase 4 native builds use expo-sharing with the captured file.
 /** Capture a view as PNG and share it (Web Share with files), falling back to a download. */
@@ -9,6 +8,8 @@ export async function shareCard(
   filename: string,
   text: string,
 ): Promise<'shared' | 'downloaded'> {
+  // Loaded on demand: html2canvas is large and only needed when someone shares.
+  const { captureRef } = await import('react-native-view-shot');
   const dataUri = await captureRef(ref, { format: 'png', quality: 1, result: 'data-uri' });
   const blob = await (await fetch(dataUri)).blob();
   const file = new File([blob], filename, { type: 'image/png' });

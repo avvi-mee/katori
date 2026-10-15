@@ -10,6 +10,7 @@ import { Screen } from '@/components/Screen';
 import { Skeleton } from '@/components/Skeleton';
 import { Text } from '@/components/Text';
 import { useSession } from '@/features/auth/session';
+import { removePendingScan, savePendingScan } from '@/features/scan/pendingScans';
 import { uploadPhoto } from '@/features/scan/photo';
 import { useScan } from '@/features/scan/store';
 import { track } from '@/lib/analytics';
@@ -23,7 +24,7 @@ const STATUS = ['scan.status1', 'scan.status2', 'scan.status3', 'scan.status4'] 
 export default function Analyzing() {
   useLocale();
   const uid = useSession((s) => s.session?.user.id);
-  const { photo, mealType, hint, startedAt, set } = useScan();
+  const { photo, mealType, hint, startedAt, takenAt, pendingScanId, set } = useScan();
   const [line, setLine] = useState(0);
   const [failed, setFailed] = useState<ApiCode | null>(null);
   const [failText, setFailText] = useState('');
@@ -56,6 +57,7 @@ export default function Analyzing() {
           avg_confidence: confidences.length ? confidences.reduce((a, b) => a + b, 0) / confidences.length : 0,
         });
         set({ draft });
+        if (pendingScanId) void removePendingScan(pendingScanId);
         router.replace('/scan/confirm-portions');
       } catch (e) {
         const code = errorCode(e);
@@ -65,7 +67,14 @@ export default function Analyzing() {
         setFailText(errorText(e));
       }
     })();
-  }, [photo, uid, mealType, hint, startedAt, set]);
+  }, [photo, uid, mealType, hint, startedAt, pendingScanId, set]);
+
+  const saveForLater = async () => {
+    if (!photo) return;
+    if (!pendingScanId)
+      await savePendingScan({ blob: photo.blob, mealType, hint, takenAt: takenAt ?? new Date().toISOString() });
+    router.replace('/');
+  };
 
   return (
     <Screen className="gap-5">
@@ -100,11 +109,15 @@ export default function Analyzing() {
                     router.replace('/scan/analyzing');
                   }}
                 />
-                <Button
-                  label={t('scan.typeIt')}
-                  variant="secondary"
-                  onPress={() => router.replace('/(tabs)/food?type=1')}
-                />
+                {failed === 'NETWORK' ? (
+                  <Button label={t('scan.saveForLater')} variant="secondary" onPress={saveForLater} />
+                ) : (
+                  <Button
+                    label={t('scan.typeIt')}
+                    variant="secondary"
+                    onPress={() => router.replace('/(tabs)/food?type=1')}
+                  />
+                )}
               </>
             )}
           </View>

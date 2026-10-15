@@ -1,4 +1,4 @@
-import { Share2 } from 'lucide-react-native';
+import { Share2 } from '@/components/icons';
 import { useRef, useState } from 'react';
 import { View } from 'react-native';
 

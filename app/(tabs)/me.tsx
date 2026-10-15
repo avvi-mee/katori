@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { Button } from '@/components/Button';
@@ -20,6 +20,7 @@ import { signOut, useSession } from '@/features/auth/session';
 import { kcalText } from '@/features/meals/format';
 import { PERSONAS, personaMeta } from '@/features/personas/personas';
 import { SavageSwitch } from '@/features/personas/SavageSwitch';
+import { disablePush, enablePush, pushEnabled } from '@/features/pwa/pwa';
 import { callFunction, errorText } from '@/lib/api';
 import { setLocale, t, useLocale, type Locale } from '@/lib/i18n';
 import { useQueryClient } from '@tanstack/react-query';
@@ -44,6 +45,30 @@ export default function Me() {
   const [picking, setPicking] = useState(false);
   const [confirm, setConfirm] = useState<'cancel' | 'delete' | null>(null);
   const [busy, setBusy] = useState(false);
+  const [push, setPush] = useState(false);
+  const uid = useSession((s) => s.session?.user.id);
+  useEffect(() => {
+    pushEnabled()
+      .then(setPush)
+      .catch(() => setPush(false));
+  }, []);
+
+  const togglePush = async (on: boolean) => {
+    try {
+      if (!on) {
+        await disablePush();
+        return setPush(false);
+      }
+      const r = await enablePush(uid!);
+      if (r === 'enabled') return setPush(true);
+      toast({
+        message:
+          r === 'needs-install' ? t('me.pushIos') : r === 'denied' ? t('me.pushDenied') : t('me.pushUnsupported'),
+      });
+    } catch {
+      toast({ message: t('common.error'), tone: 'error' });
+    }
+  };
   const { isPro, subscription } = useEntitlement();
   const qc = useQueryClient();
   const periodEnd = subscription?.current_period_end
@@ -110,6 +135,7 @@ export default function Me() {
         {profile.persona === 'gym_bro' ? (
           <SavageSwitch value={profile.savage_mode} adultConfirmed={profile.adult_confirmed} onChange={save} />
         ) : null}
+        <Switch label={t('me.push')} description={t('me.pushDesc')} value={push} onChange={togglePush} />
         <Switch
           label={t('me.mute')}
           description={t('me.muteDesc')}

@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 
+import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { CoachBubble } from '@/components/CoachBubble';
 import { CountUp } from '@/components/CountUp';
@@ -21,6 +22,8 @@ import { formatAmount, kcalText } from '@/features/meals/format';
 import { buildCoachMessage } from '@/features/personas/coach';
 import { istHour } from '@/features/personas/facts';
 import { totals } from '@/features/portions/engine';
+import { usePendingScans } from '@/features/scan/pendingScans';
+import { useScan } from '@/features/scan/store';
 import { istDay } from '@/lib/day';
 import { t, useLocale, type MessageKey } from '@/lib/i18n';
 
@@ -34,6 +37,7 @@ export default function Today() {
   const meals = useDayMeals(today);
   const coach = useTodayCoach(today);
   const del = useDeleteMeal();
+  const waiting = usePendingScans((s) => s.scans);
   const [pending, setPending] = useState<Set<string>>(new Set());
   const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
@@ -166,6 +170,30 @@ export default function Today() {
         />
       ) : null}
 
+      {waiting.length ? (
+        <Card className="gap-3">
+          <Text variant="heading">{t('today.waiting', { n: waiting.length })}</Text>
+          <Button
+            label={t('today.analyseNow')}
+            size="md"
+            onPress={() => {
+              const s = waiting[0]!;
+              const scan = useScan.getState();
+              scan.reset();
+              scan.set({
+                photo: { blob: s.blob, url: URL.createObjectURL(s.blob) },
+                mealType: s.mealType,
+                hint: s.hint,
+                takenAt: s.takenAt,
+                pendingScanId: s.id,
+                startedAt: Date.now(),
+              });
+              router.push('/scan/analyzing');
+            }}
+          />
+        </Card>
+      ) : null}
+
       <Text variant="caption" className="mt-2 font-sans-bold uppercase tracking-widest">
         {t('today.meals')}
       </Text>
@@ -197,7 +225,7 @@ export default function Today() {
                   <Text variant="caption">
                     {m.meal_items[0] ? formatAmount(m.meal_items[0].qty, m.meal_items[0].unit) : ''}
                     {m.meal_items.length > 1 ? ` +${m.meal_items.length - 1}` : ''} · {Math.round(m.protein_g)} g
-                    protein
+                    protein{m.pending ? ` · ${t('sync.pending')}` : ''}
                   </Text>
                 </View>
                 <Text variant="label">{kcalText(m.kcal)}</Text>

@@ -9,6 +9,10 @@ type ScanState = {
   mealType: MealType;
   hint: string;
   startedAt: number;
+  /** When the photo was taken (offline scans are analysed later but logged at this time). */
+  takenAt: string | null;
+  /** Set when analysing a photo saved offline, so it can be removed once analysed. */
+  pendingScanId: string | null;
   draft: DraftResponse | null;
   result: ConfirmResponse | null;
   set: (patch: Partial<Omit<ScanState, 'set' | 'reset'>>) => void;
@@ -21,12 +25,23 @@ export const useScan = create<ScanState>((set, get) => ({
   mealType: mealTypeFor(),
   hint: '',
   startedAt: 0,
+  takenAt: null,
+  pendingScanId: null,
   draft: null,
   result: null,
   set: (patch) => set(patch),
   reset: () => {
     const url = get().photo?.url;
     if (url) URL.revokeObjectURL(url);
-    set({ photo: null, mealType: mealTypeFor(), hint: '', startedAt: 0, draft: null, result: null });
+    set({
+      photo: null,
+      mealType: mealTypeFor(),
+      hint: '',
+      startedAt: 0,
+      takenAt: null,
+      pendingScanId: null,
+      draft: null,
+      result: null,
+    });
   },
 }));

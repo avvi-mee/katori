@@ -7,7 +7,9 @@
     "@expo-google-fonts/manrope": "^0.4.2",
     "@hookform/resolvers": "^5.9.1",
     "@supabase/supabase-js": "^2.117.3",
+    "@tanstack/query-async-storage-persister": "^5.104.2",
     "@tanstack/react-query": "^5.104.2",
+    "@tanstack/react-query-persist-client": "^5.104.2",
     "expo": "~57.0.29",
     "expo-constants": "~57.0.22",
     "expo-font": "~57.0.4",
@@ -41,18 +43,20 @@
     "@types/node": "^26.6.5",
     "@types/react": "~19.2.2",
     "deno": "^2.9.6",
+    "fake-indexeddb": "^6.2.5",
     "prettier": "^3.9.10",
     "supabase": "^2.121.0",
     "tailwindcss": "^3.4.19",
     "typescript": "~6.0.3",
-    "vitest": "^5.0.4"
+    "vitest": "^5.0.4",
+    "workbox-build": "^7.4.1"
   },
   "scripts": {
     "start": "expo start",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit && deno check --config supabase/functions/deno.json supabase/functions",
     "test": "vitest run",
-    "build:web": "expo export --platform web",
+    "build:web": "node scripts/build-web.mjs",
     "format": "prettier --write .",
     "seed:build": "node scripts/build-seed.mjs",
     "shared:sync": "node scripts/sync-shared.mjs"

@@ -18,7 +18,7 @@ import type { Answer } from '@/types/meal';
 
 export default function ConfirmPortions() {
   useLocale();
-  const { photo, draft, set } = useScan();
+  const { photo, draft, takenAt, set } = useScan();
   const [open, setOpen] = useState(true);
   const confirm = useConfirmMeal();
   // One id per draft so a double tap or retry can never save the meal twice.
@@ -35,7 +35,8 @@ export default function ConfirmPortions() {
       }
     }
     confirm.mutate(
-      { client_id: clientId, draft_id: draft.draft_id, answers },
+      // Photos analysed later (saved offline) are logged at the time they were taken.
+      { client_id: clientId, draft_id: draft.draft_id, answers, ...(takenAt ? { eaten_at: takenAt } : {}) },
       {
         onSuccess: (result) => {
           set({ result });

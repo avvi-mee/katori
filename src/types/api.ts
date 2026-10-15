@@ -22,4 +22,6 @@ export type ConfirmResponse = Totals & {
   day_totals: DayTotals;
   coach_message: { text: string; persona: string; gentle?: boolean } | null;
   duplicate?: boolean;
+  /** Saved to the offline outbox; numbers are a local preview until it syncs. */
+  queued?: boolean;
 };

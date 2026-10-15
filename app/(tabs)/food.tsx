@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Camera, ChevronLeft, ChevronRight, Plus, Type } from 'lucide-react-native';
+import { Camera, ChevronLeft, ChevronRight, Plus, Type } from '@/components/icons';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
@@ -131,7 +131,7 @@ export default function Food() {
         </Card>
       ) : (
         MEAL_ORDER.map((type) => {
-          const group = meals.data.filter((m) => m.meal_type === type);
+          const group = (meals.data ?? []).filter((m) => m.meal_type === type);
           if (!group.length) return null;
           return (
             <View key={type} className="gap-2">
@@ -144,6 +144,7 @@ export default function Food() {
                     <Text variant="caption">
                       {new Date(m.eaten_at).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}
                       {m.source === 'outside' ? ' · bahar ka' : ''}
+                      {m.pending ? ` · ${t('sync.pending')}` : ''}
                     </Text>
                     <Text variant="label">{kcalText(m.kcal)} kcal</Text>
                   </View>
