@@ -1,0 +1,64 @@
+// server-shared: turns logged meals into the coach's facts.
+import { addDays, istDay } from '../../lib/day.ts';
+
+import type { CoachFacts, CoachTrigger, DietType } from './safety.ts';
+
+export type DayTotal = { kcal: number; protein_g: number; meals: number };
+
+/** Hour of day in IST (0–23). */
+export function istHour(at: Date): number {
+  return Math.floor(((at.getUTCHours() * 60 + at.getUTCMinutes() + 330) % 1440) / 60);
+}
+
+export function groupByDay(
+  rows: { eaten_at: string; kcal: number | string; protein_g: number | string }[],
+): Map<string, DayTotal> {
+  const out = new Map<string, DayTotal>();
+  for (const r of rows) {
+    const d = istDay(new Date(r.eaten_at));
+    const t = out.get(d) ?? { kcal: 0, protein_g: 0, meals: 0 };
+    out.set(d, { kcal: t.kcal + Number(r.kcal), protein_g: t.protein_g + Number(r.protein_g), meals: t.meals + 1 });
+  }
+  return out;
+}
+
+/** Consecutive logged days before `day` that ended below the floor (an unlogged day breaks the run). Max 2. */
+export function lowDaysBefore(totalsByDay: Map<string, DayTotal>, day: string, floor: number): number {
+  let n = 0;
+  for (let d = addDays(day, -1); n < 2; d = addDays(d, -1)) {
+    const t = totalsByDay.get(d);
+    if (!t || t.meals === 0 || t.kcal >= floor) break;
+    n++;
+  }
+  return n;
+}
+
+export type FactsProfile = {
+  kcal_target: number | null;
+  protein_target: number | null;
+  kcal_floor: number | null;
+  diet_type: DietType | null;
+};
+
+export function buildFacts(
+  p: FactsProfile,
+  trigger: CoachTrigger,
+  at: Date,
+  totalsByDay: Map<string, DayTotal>,
+): CoachFacts {
+  const day = istDay(at);
+  const today = totalsByDay.get(day) ?? { kcal: 0, protein_g: 0, meals: 0 };
+  const floor = p.kcal_floor ?? 1200;
+  return {
+    trigger,
+    hour: istHour(at),
+    kcal: Math.round(today.kcal),
+    protein_g: Math.round(today.protein_g),
+    meals: today.meals,
+    kcal_target: p.kcal_target ?? 2000,
+    protein_target: p.protein_target ?? 100,
+    kcal_floor: floor,
+    low_days_before: lowDaysBefore(totalsByDay, day, floor),
+    diet_type: p.diet_type,
+  };
+}

@@ -14,6 +14,9 @@ import {
   type Question,
 } from '../_shared/gen/types/meal.ts';
 import { adminClient, fail, json, readBody, requireUser, serve, type Admin } from '../_shared/http.ts';
+import { recentTotals, writeCoach } from '../_shared/coach.ts';
+import { buildFacts } from '../_shared/gen/features/personas/facts.ts';
+import { istDay } from '../_shared/gen/lib/day.ts';
 import { dayTotals, loadFoods, loadUsual, loadUserContext } from '../_shared/meals.ts';
 
 const Common = { client_id: z.string().uuid(), eaten_at: z.string().datetime().optional() };
@@ -72,7 +75,7 @@ serve(async (req) => {
       duplicate: true,
     });
 
-  const { ctx } = await loadUserContext(admin, user.id);
+  const { ctx, isPro, coach } = await loadUserContext(admin, user.id);
   let computed: ComputedItem[];
   let source: z.infer<typeof MealSource>;
   let mealType: z.infer<typeof MealType>;
@@ -195,6 +198,20 @@ serve(async (req) => {
   await updateUsual(admin, user.id, computed);
   if (draftId) await admin.from('meal_drafts').update({ consumed_at: new Date().toISOString() }).eq('id', draftId);
 
+  const totalsByDay = await recentTotals(admin, user.id, at);
+  // Muted nudges: no coach line after meals (the evening summary still lands in-app).
+  const coachMessage = coach.nudges_muted
+    ? null
+    : await writeCoach(admin, coach, buildFacts(coach, 'meal_saved', at, totalsByDay), {
+        isPro,
+        day: istDay(at),
+        deliveredVia: 'in_app',
+        aiTimeoutMs: 3500,
+      }).catch((e) => {
+        console.warn('coach message failed', e);
+        return null;
+      });
+
   return json({
     meal_id: meal.id,
     items: computed,
@@ -203,7 +220,7 @@ serve(async (req) => {
     unmatched,
     rejected,
     day_totals: await dayTotals(admin, user.id, at),
-    coach_message: null,
+    coach_message: coachMessage,
   });
 });
 

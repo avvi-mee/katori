@@ -12,22 +12,25 @@ import {
 import { parseAiReply, repairPrompt, type AiReply } from './gen/features/scan/prompt.ts';
 import { istDay, istDayRange } from './gen/lib/day.ts';
 import type { DraftItem, MealSource, MealType, Question } from './gen/types/meal.ts';
+import { COACH_PROFILE_COLUMNS, type CoachProfileRow } from './coach.ts';
 import { fail, type Admin } from './http.ts';
 
 export const FOOD_COLUMNS =
   'id, name, units, density_g_per_ml, kcal_100g, protein_100g, carbs_100g, fat_100g, default_oil_g';
 const MATCH_THRESHOLD = 0.35;
 
-export type UserContext = { ctx: PortionContext; isPro: boolean };
+export type UserContext = { ctx: PortionContext; isPro: boolean; coach: CoachProfileRow };
 
 export async function loadUserContext(admin: Admin, uid: string): Promise<UserContext> {
-  const [{ data: profile }, { data: pro }] = await Promise.all([
-    admin.from('profiles').select('katori_ml, plate_size').eq('id', uid).single(),
+  const [{ data: profile, error }, { data: pro }] = await Promise.all([
+    admin.from('profiles').select(`katori_ml, plate_size, ${COACH_PROFILE_COLUMNS}`).eq('id', uid).single(),
     admin.rpc('is_pro', { uid }),
   ]);
+  if (error || !profile) fail('UNAUTHENTICATED', 'Profile not found.');
   return {
-    ctx: { katori_ml: profile?.katori_ml ?? 150, plate_size: profile?.plate_size ?? 'medium' },
+    ctx: { katori_ml: profile.katori_ml ?? 150, plate_size: profile.plate_size ?? 'medium' },
     isPro: pro === true,
+    coach: profile as unknown as CoachProfileRow,
   };
 }
 

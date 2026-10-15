@@ -1,0 +1,125 @@
+// server-shared: template lines per persona. Templates cover the common cases at zero AI cost;
+// Pro users get an AI rewrite that must still pass checkCoachText.
+// Placeholders: {gap} protein still needed (g), {left} kcal left, {fix} suggested food, {kcal}, {protein},
+// {target} kcal target, {ptarget} protein target, {floor} minimum kcal.
+import type { PersonaId } from './personas.ts';
+
+export type Situation = 'on_track' | 'protein_short' | 'over' | 'great_day' | 'okay_day' | 'no_logs' | 'gentle';
+
+type Lines = Record<Situation, string[]>;
+
+export const TEMPLATES: Record<PersonaId, Lines> = {
+  gym_bro: {
+    on_track: [
+      'Sahi ja raha hai bhai! {left} kcal bache hain, protein {gap}g aur chahiye — {fix} maar de.',
+      'Solid plate bhai. Aaj ka protein {gap}g baaki hai, {fix} se kaam ho jayega.',
+    ],
+    protein_short: [
+      'Bhai protein {gap}g short hai aaj. Dinner mein {fix}, warna gains ko bye bol de.',
+      'Protein kam pad raha hai bhai — {gap}g baaki. {fix} add kar de.',
+    ],
+    over: [
+      'Bhai aaj {kcal} kcal ho gaye, target {target} tha. Kal plate halki rakh, aaj ek walk maar.',
+      'Thoda zyada ho gaya bhai, {kcal} kcal. Koi tension nahi, kal wapas track pe.',
+    ],
+    great_day: [
+      'Aaj ka din ekdum on point bhai — {kcal} kcal, {protein}g protein. Kal bhi yahi energy!',
+      'Bhai kya din tha! {protein}g protein, target hit. Aise hi chalta reh.',
+    ],
+    okay_day: [
+      'Aaj {kcal} kcal aur {protein}g protein. Kal ka ek fix: {fix}.',
+      'Theek-thaak din bhai. Kal protein ke liye {fix} pakka.',
+    ],
+    no_logs: ['Bhai aaj kuch log hi nahi kiya. Kal pehli meal ki photo pakki?'],
+    gentle: [
+      'Bhai, aaj khana bahut kam hua hai. Energy ke liye ek proper meal kha le — dal-chawal bhi chalega.',
+      'Bhai, aaj thoda dhyan de — ek poori thali kha le. Training ke liye fuel zaroori hai.',
+    ],
+  },
+  desi_mummy: {
+    on_track: [
+      'Shabaash beta! Bas {gap}g protein aur chahiye — {fix} kha lena.',
+      'Achha khaya beta. Raat ko {fix} le lena, protein poora ho jayega.',
+    ],
+    protein_short: [
+      'Beta, protein kam hai aaj, {gap}g baaki. Raat ko {fix} khana.',
+      'Beta, chai-nashta theek hai, par protein {gap}g kam hai. {fix} bana lo.',
+    ],
+    over: [
+      'Beta, aaj thoda zyada ho gaya — {kcal} kcal. Koi baat nahi, kal halka khana aur thoda tehel lena.',
+      'Aaj {kcal} kcal ho gaye beta. Kal sabzi zyada, tala hua kam.',
+    ],
+    great_day: [
+      'Waah beta! {kcal} kcal aur {protein}g protein, ekdum perfect din.',
+      'Mera beta toh champion hai! Aaj ka khana bilkul sahi raha.',
+    ],
+    okay_day: [
+      'Aaj {kcal} kcal khaya beta. Kal {fix} zaroor khana.',
+      'Theek raha aaj beta. Kal nashte mein {fix} le lena.',
+    ],
+    no_logs: ['Beta, aaj kuch bataya hi nahi kya khaya. Kal photo bhejna, haan?'],
+    gentle: [
+      'Beta, aaj bahut kam khaya hai. Pehle ek proper meal kha lo — dal, chawal, sabzi. Sehat pehle.',
+      'Beta, khana mat chhodo. Abhi garam dal-chawal kha lo, phir aaram karo.',
+    ],
+  },
+  strict_coach: {
+    on_track: [
+      '{kcal} kcal so far. {left} kcal and {gap} g protein left: {fix}.',
+      'On plan. Remaining today: {gap} g protein. Option: {fix}.',
+    ],
+    protein_short: [
+      'Protein: {protein} g of {ptarget} g. You need {gap} g more: {fix}.',
+      '{gap} g protein short. Fix it at the next meal: {fix}.',
+    ],
+    over: [
+      '{kcal} kcal vs target {target}. Keep tomorrow at target and add a 30 minute walk.',
+      'Over target today: {kcal} kcal. Tomorrow: lighter dinner, protein first.',
+    ],
+    great_day: [
+      'Day closed at {kcal} kcal and {protein} g protein. Targets met.',
+      'Targets met: {kcal} kcal, {protein} g protein. Repeat tomorrow.',
+    ],
+    okay_day: [
+      'Day closed at {kcal} kcal, {protein} g protein. Tomorrow’s fix: {fix}.',
+      'Logged {kcal} kcal. Tomorrow add {fix}.',
+    ],
+    no_logs: ['No meals logged today. Log your first meal tomorrow.'],
+    gentle: [
+      'Intake is well below your safe minimum of {floor} kcal. Eat a full meal now: dal, rice and a vegetable.',
+      'You are under {floor} kcal. Have a complete meal before bed.',
+    ],
+  },
+  hype_friend: {
+    on_track: [
+      "You're in range! {gap} g protein to go — {fix} and today's a win.",
+      'Look at you go! Just {fix} for the last {gap} g protein.',
+    ],
+    protein_short: [
+      "Okay snack era, but protein is {gap} g short. One {fix} and you're golden!",
+      'Protein check: {gap} g to go. {fix} for the win!',
+    ],
+    over: [
+      "{kcal} kcal today — happens! Tomorrow's a fresh start, you've got this.",
+      'Big food day! Tomorrow we reset, no stress.',
+    ],
+    great_day: [
+      'WHAT a day! {kcal} kcal and {protein} g protein. Proud of you!',
+      'Targets smashed today! Same energy tomorrow?',
+    ],
+    okay_day: ["Solid day: {kcal} kcal. Tomorrow's power move: {fix}!", 'Good effort today! Tomorrow add {fix}.'],
+    no_logs: ['Missed logging today? No worries — snap your first meal tomorrow!'],
+    gentle: [
+      "Hey, you've eaten really little today. Let's get a proper meal in — you deserve it!",
+      'Quick check-in: please have a full meal tonight. Dal-chawal counts!',
+    ],
+  },
+};
+
+/** Sharper Gym Bro lines for Savage mode (18+). Attitude about the food, never abuse. */
+export const SAVAGE: Partial<Lines> = {
+  on_track: ['Theek hai, aaj tu control mein hai. {gap}g protein baaki — {fix}, bahane nahi.'],
+  protein_short: ['Protein {gap}g short aur tu chill kar raha hai? {fix} kha, gains khud nahi aayenge.'],
+  over: ['{kcal} kcal? Plate ne aaj tujhe hara diya. Kal discipline ke saath wapas aa.'],
+  okay_day: ['{kcal} kcal, {protein}g protein. Average din, average gains. Kal {fix}.'],
+};

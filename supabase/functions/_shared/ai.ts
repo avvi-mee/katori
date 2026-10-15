@@ -46,7 +46,7 @@ async function gemini(prompt: Prompt, image?: Image) {
           ],
         },
       ],
-      generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
+      generationConfig: { ...(prompt.jsonSchema ? { responseMimeType: 'application/json' } : {}), temperature: 0.2 },
     }),
   }).catch((e) => {
     throw new AiUnavailable(`gemini request failed: ${e}`);
