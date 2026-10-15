@@ -111,6 +111,57 @@ export function useConfirmMeal() {
     onSuccess: (res, input) => {
       track('meal_saved', { input_mode: 'draft_id' in input ? 'scan' : 'manual', kcal: res.kcal });
       qc.invalidateQueries({ queryKey: ['meals'] });
+      qc.invalidateQueries({ queryKey: ['usual'] });
     },
+  });
+}
+
+export type UsualDish = {
+  food_item_id: string;
+  unit: Unit;
+  qty: number;
+  oil_level: OilLevel | null;
+  times_used: number;
+  name: string;
+};
+
+/** The user's most-logged dishes with their usual portion ("my usual"). */
+export function useUsualDishes(limit = 8) {
+  const uid = useSession((s) => s.session?.user.id);
+  return useQuery({
+    queryKey: ['usual', uid],
+    enabled: !!uid,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_dish_defaults')
+        .select('food_item_id, unit, qty, oil_level, times_used, food_items(name)')
+        .order('times_used', { ascending: false })
+        .order('updated_at', { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return (data ?? []).map((r) => {
+        const f = r.food_items as unknown as { name: string } | { name: string }[] | null;
+        return {
+          food_item_id: r.food_item_id as string,
+          unit: r.unit as Unit,
+          qty: num(r.qty),
+          oil_level: r.oil_level as OilLevel | null,
+          times_used: r.times_used as number,
+          name: (Array.isArray(f) ? f[0]?.name : f?.name) ?? '',
+        };
+      });
+    },
+  });
+}
+
+/** Owner delete (RLS allows it); used by Undo and swipe-to-delete. */
+export function useDeleteMeal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (mealId: string) => {
+      const { error } = await supabase.from('meals').delete().eq('id', mealId);
+      if (error) throw error;
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['meals'] }),
   });
 }

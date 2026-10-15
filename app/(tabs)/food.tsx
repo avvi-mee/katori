@@ -16,6 +16,7 @@ import { useDayMeals } from '@/features/meals/api';
 import { formatAmount, kcalText, MEAL_ORDER } from '@/features/meals/format';
 import { ManualAddSheet } from '@/features/meals/ManualAddSheet';
 import { TypeMealSheet } from '@/features/meals/TypeMealSheet';
+import { UsualRow } from '@/features/meals/UsualRow';
 import { totals } from '@/features/portions/engine';
 import { addDays, istDay } from '@/lib/day';
 import { t, useLocale, type MessageKey } from '@/lib/i18n';
@@ -107,6 +108,8 @@ export default function Food() {
           onPress={() => setAdding(true)}
         />
       </View>
+
+      {day === today ? <UsualRow /> : null}
 
       {meals.isPending ? (
         <View className="gap-3">

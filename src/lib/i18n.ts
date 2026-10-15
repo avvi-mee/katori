@@ -186,6 +186,8 @@ const en = {
   'food.save': 'Add {kcal} kcal',
   'food.saved': 'Added · {kcal} kcal',
   'food.emptyDay': 'Nothing logged this day.',
+  'food.usual': 'My usual',
+  'food.addUsual': 'Add {dish}, {amount}',
   'oil.kam': 'Kam',
   'oil.normal': 'Normal',
   'oil.zyada': 'Zyada',
@@ -262,6 +264,7 @@ const hinglish: Partial<Record<MessageKey, string>> = {
   'food.search': 'Dish dhoondho',
   'food.amount': 'Kitna?',
   'food.emptyDay': 'Is din kuch log nahi kiya.',
+  'food.usual': 'Mera usual',
 };
 
 const useLocaleStore = create<{ locale: Locale }>(() => ({ locale: 'en' }));
