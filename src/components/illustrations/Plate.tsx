@@ -7,7 +7,7 @@ export function PlateArt({ size = 96, scale = 1 }: { size?: number; scale?: numb
   const { colors } = useTheme();
   const r = 44 * scale;
   return (
-    <Svg width={size} height={size} viewBox="0 0 100 100" accessibilityElementsHidden>
+    <Svg width={size} height={size} viewBox="0 0 100 100" aria-hidden>
       <Ellipse cx="50" cy={54 + r * 0.08} rx={r} ry={r * 0.96} fill={colors.line} />
       <Circle cx="50" cy="50" r={r} fill={colors.surface2} stroke={colors.inkMuted} strokeWidth="2" />
       <Circle cx="50" cy="50" r={r * 0.78} fill="none" stroke={colors.line} strokeWidth="1.5" />

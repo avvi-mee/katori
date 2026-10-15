@@ -7,7 +7,7 @@ export function KatoriArt({ size = 120, fill = 0.7 }: { size?: number; fill?: nu
   const { colors } = useTheme();
   const level = 36 + (1 - fill) * 18;
   return (
-    <Svg width={size} height={size * 0.75} viewBox="0 0 120 90" accessibilityElementsHidden>
+    <Svg width={size} height={size * 0.75} viewBox="0 0 120 90" aria-hidden>
       <Ellipse cx="60" cy="82" rx="38" ry="5" fill={colors.line} />
       <Path d="M14 34 Q18 78 60 78 Q102 78 106 34 Z" fill={colors.surface2} stroke={colors.inkMuted} strokeWidth="2" />
       <Ellipse cx="60" cy={level} rx={42 - (level - 36) * 1.1} ry="7" fill={colors.carbs} />

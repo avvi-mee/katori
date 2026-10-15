@@ -4,6 +4,8 @@
 module.exports = {
   content: ['./app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
+  // We theme with CSS variables, not dark: classes; 'class' lets the app (and Expo dev tools) set the scheme.
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
