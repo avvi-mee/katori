@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useSession } from '@/features/auth/session';
+import { groupByDay } from '@/features/personas/facts';
+import type { PersonaId } from '@/features/personas/personas';
 import type { Food } from '@/features/portions/engine';
 import { track } from '@/lib/analytics';
 import { callFunction } from '@/lib/api';
-import { istDayRange } from '@/lib/day';
+import { addDays, istDayRange } from '@/lib/day';
 import { supabase } from '@/lib/supabase';
 import type { ConfirmResponse } from '@/types/api';
 import type { Answer, MealSource, MealType, OilLevel, Unit } from '@/types/meal';
@@ -163,5 +165,53 @@ export function useDeleteMeal() {
       if (error) throw error;
     },
     onSettled: () => qc.invalidateQueries({ queryKey: ['meals'] }),
+  });
+}
+
+/** Per-day totals for the last `n` IST days (for Progress and streaks). */
+export function useDayTotals(today: string, n = 7) {
+  const uid = useSession((s) => s.session?.user.id);
+  return useQuery({
+    queryKey: ['meals', uid, 'totals', today, n],
+    enabled: !!uid,
+    queryFn: async () => {
+      const { from } = istDayRange(addDays(today, -(n - 1)));
+      const { to } = istDayRange(today);
+      const { data, error } = await supabase
+        .from('meals')
+        .select('eaten_at, kcal, protein_g')
+        .gte('eaten_at', from)
+        .lt('eaten_at', to);
+      if (error) throw error;
+      return groupByDay(data ?? []);
+    },
+  });
+}
+
+export type CoachLine = { text: string; persona: PersonaId; gentle: boolean; created_at: string };
+
+/** Latest coach line saved today (after a meal or by the evening digest). */
+export function useTodayCoach(today: string) {
+  const uid = useSession((s) => s.session?.user.id);
+  return useQuery({
+    queryKey: ['meals', uid, 'coach', today],
+    enabled: !!uid,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('coach_messages')
+        .select('text, persona, facts, created_at')
+        .eq('day', today)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return {
+        text: data.text as string,
+        persona: data.persona as PersonaId,
+        gentle: (data.facts as { tone?: string } | null)?.tone === 'gentle',
+        created_at: data.created_at as string,
+      } satisfies CoachLine;
+    },
   });
 }

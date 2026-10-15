@@ -24,19 +24,24 @@ import { t, useLocale, type MessageKey } from '@/lib/i18n';
 export default function Food() {
   useLocale();
   const { colors } = useTheme();
-  const params = useLocalSearchParams<{ type?: string }>();
+  const params = useLocalSearchParams<{ type?: string; add?: string }>();
   const today = istDay();
   const [day, setDay] = useState(today);
   const [typing, setTyping] = useState(false);
   const [adding, setAdding] = useState(false);
   const meals = useDayMeals(day);
 
+  // The FAB and the camera link here with ?type=1 / ?add=1 to open a sheet.
   useEffect(() => {
     if (params.type === '1') {
       setTyping(true);
       router.setParams({ type: undefined });
     }
-  }, [params.type]);
+    if (params.add === '1') {
+      setAdding(true);
+      router.setParams({ add: undefined });
+    }
+  }, [params.type, params.add]);
 
   const dayTotal = totals(meals.data ?? []);
   const label =

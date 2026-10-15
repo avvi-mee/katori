@@ -39,7 +39,7 @@ export function ReportCard({ weekLabel, avgKcal, kcalTarget, proteinDays, coachL
           <Text variant="hero" className="text-on-accent">
             {Math.round(avgKcal)}
           </Text>
-          <Text variant="label" className="text-on-accent">
+          <Text variant="label" className="mt-2 text-on-accent">
             {t('report.avgKcal')} · target {Math.round(kcalTarget)}
           </Text>
         </View>

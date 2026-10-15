@@ -1,21 +1,154 @@
-import { Button } from '@/components/Button';
-import { Screen } from '@/components/Screen';
-import { Text } from '@/components/Text';
-import { signOut } from '@/features/auth/session';
-import { useProfile } from '@/features/auth/profile';
-import { t, useLocale } from '@/lib/i18n';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { View } from 'react-native';
 
-// Placeholder; persona, calibration, plan and delete account land in steps 7–8.
-export default function Me() {
-  useLocale();
-  const { data: profile } = useProfile();
+import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
+import { ChipRow } from '@/components/ChipRow';
+import { CoachBubble } from '@/components/CoachBubble';
+import { OptionCard } from '@/components/OptionCard';
+import { Screen } from '@/components/Screen';
+import { Sheet } from '@/components/Sheet';
+import { Skeleton } from '@/components/Skeleton';
+import { Switch } from '@/components/Switch';
+import { Text } from '@/components/Text';
+import { toast } from '@/components/Toast';
+import { useThemePref } from '@/design/theme';
+import { useProfile, useUpdateProfile, type ProfileUpdate } from '@/features/auth/profile';
+import { signOut, useSession } from '@/features/auth/session';
+import { kcalText } from '@/features/meals/format';
+import { PERSONAS, personaMeta } from '@/features/personas/personas';
+import { SavageSwitch } from '@/features/personas/SavageSwitch';
+import { setLocale, t, useLocale, type Locale } from '@/lib/i18n';
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Screen className="gap-4">
-      <Text variant="display" accessibilityRole="header">
-        {t('tabs.me')}
+    <View className="gap-2">
+      <Text variant="caption" className="font-sans-bold uppercase tracking-widest">
+        {title}
       </Text>
-      {profile?.name ? <Text variant="heading">{profile.name}</Text> : null}
+      <Card className="gap-4">{children}</Card>
+    </View>
+  );
+}
+
+export default function Me() {
+  const locale = useLocale();
+  const email = useSession((s) => s.session?.user.email);
+  const { data: profile } = useProfile();
+  const update = useUpdateProfile();
+  const { pref, setPref } = useThemePref();
+  const [picking, setPicking] = useState(false);
+
+  const save = (patch: ProfileUpdate) =>
+    update.mutate(patch, { onError: () => toast({ message: t('common.error'), tone: 'error' }) });
+
+  if (!profile) {
+    return (
+      <Screen className="gap-4">
+        <Skeleton width="40%" height={34} />
+        <Skeleton height={160} radius={20} />
+        <Skeleton height={120} radius={20} />
+      </Screen>
+    );
+  }
+
+  return (
+    <Screen className="gap-5">
+      <View>
+        <Text variant="display" accessibilityRole="header">
+          {profile.name ?? t('tabs.me')}
+        </Text>
+        {email ? <Text variant="caption">{email}</Text> : null}
+      </View>
+
+      <Section title={t('me.coach')}>
+        <CoachBubble persona={profile.persona} text={personaMeta[profile.persona].sample} />
+        <Button label={t('me.changeCoach')} variant="secondary" size="md" onPress={() => setPicking(true)} />
+        {profile.persona === 'gym_bro' ? (
+          <SavageSwitch value={profile.savage_mode} adultConfirmed={profile.adult_confirmed} onChange={save} />
+        ) : null}
+        <Switch
+          label={t('me.mute')}
+          description={t('me.muteDesc')}
+          value={profile.nudges_muted}
+          onChange={(v) => save({ nudges_muted: v })}
+        />
+      </Section>
+
+      <Section title={t('me.targets')}>
+        <View className="flex-row justify-between">
+          <View>
+            <Text variant="number">{kcalText(profile.kcal_target ?? 0)}</Text>
+            <Text variant="caption">{t('onb.plan.kcal')}</Text>
+          </View>
+          <View className="items-end">
+            <Text variant="number">{profile.protein_target ?? 0} g</Text>
+            <Text variant="caption">{t('macro.protein')}</Text>
+          </View>
+        </View>
+        <Text variant="caption">{t('me.floor', { kcal: kcalText(profile.kcal_floor ?? 1200) })}</Text>
+      </Section>
+
+      <Section title={t('me.calibration')}>
+        <ChipRow
+          accessibilityLabel={t('onb.calib.title')}
+          options={[100, 150, 200].map((ml) => ({ id: String(ml), label: `${ml} ml katori` }))}
+          value={String(profile.katori_ml)}
+          onChange={(id) => save({ katori_ml: Number(id) })}
+        />
+        <ChipRow
+          accessibilityLabel={t('onb.calib.plate')}
+          options={(['small', 'medium', 'large'] as const).map((id) => ({ id, label: `${t(`calib.${id}`)} thali` }))}
+          value={profile.plate_size}
+          onChange={(id) => save({ plate_size: id as 'small' | 'medium' | 'large' })}
+        />
+      </Section>
+
+      <Section title={t('me.appearance')}>
+        <ChipRow
+          accessibilityLabel={t('onb.language')}
+          options={[
+            { id: 'en', label: 'English' },
+            { id: 'hinglish', label: 'Hinglish' },
+          ]}
+          value={locale}
+          onChange={(id) => {
+            setLocale(id as Locale);
+            save({ locale: id as Locale });
+          }}
+        />
+        <ChipRow
+          accessibilityLabel={t('me.appearance')}
+          options={(['system', 'light', 'dark'] as const).map((id) => ({ id, label: t(`theme.${id}`) }))}
+          value={pref}
+          onChange={(id) => setPref(id as typeof pref)}
+        />
+      </Section>
+
+      <Section title={t('me.plan')}>
+        <Button label={t('me.upgrade')} size="md" onPress={() => router.push('/paywall?from=me')} />
+      </Section>
+
+      <Text variant="caption">{t('me.privacy')}</Text>
       <Button label={t('me.signOut')} variant="secondary" onPress={signOut} />
+
+      <Sheet open={picking} onClose={() => setPicking(false)} title={t('onb.coach.title')}>
+        <View className="gap-2">
+          {PERSONAS.map((id) => (
+            <OptionCard
+              key={id}
+              title={personaMeta[id].name}
+              subtitle={personaMeta[id].voice}
+              selected={profile.persona === id}
+              onPress={() => {
+                save({ persona: id, savage_mode: id === 'gym_bro' ? profile.savage_mode : false });
+                setPicking(false);
+              }}
+            />
+          ))}
+        </View>
+      </Sheet>
     </Screen>
   );
 }

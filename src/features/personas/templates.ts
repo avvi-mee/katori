@@ -123,3 +123,33 @@ export const SAVAGE: Partial<Lines> = {
   over: ['{kcal} kcal? Plate ne aaj tujhe hara diya. Kal discipline ke saath wapas aa.'],
   okay_day: ['{kcal} kcal, {protein}g protein. Average din, average gains. Kal {fix}.'],
 };
+
+/** One line for the weekly report card. {hit} = protein-goal days out of 7. */
+export const WEEKLY: Record<PersonaId, { strong: string; building: string; start: string }> = {
+  gym_bro: {
+    strong: '{hit}/7 protein days bhai. Ye consistency hi gains banati hai!',
+    building: '{hit}/7 protein days. Next week thoda aur push, bhai.',
+    start: 'Is hafte kam log hua bhai. Next week har meal ki photo, deal?',
+  },
+  desi_mummy: {
+    strong: '{hit} din protein poora kiya beta. Bahut achha!',
+    building: '{hit} din protein poora hua beta. Agle hafte dal-dahi roz.',
+    start: 'Beta, is hafte kam bataya. Agle hafte roz khana log karna.',
+  },
+  strict_coach: {
+    strong: 'Protein target hit on {hit} of 7 days. Maintain.',
+    building: 'Protein target hit on {hit} of 7 days. Aim higher next week.',
+    start: 'Too few logs this week to judge. Log every meal next week.',
+  },
+  hype_friend: {
+    strong: '{hit} protein days this week. You are on fire!',
+    building: '{hit} protein days, nice start! Next week we level up.',
+    start: 'New week, new streak. Snap every meal and watch it grow!',
+  },
+};
+
+export function weeklyLine(persona: PersonaId, hitDays: number, loggedDays: number): string {
+  const w = WEEKLY[persona];
+  const line = loggedDays < 3 ? w.start : hitDays >= 5 ? w.strong : w.building;
+  return line.replace('{hit}', String(hitDays));
+}
