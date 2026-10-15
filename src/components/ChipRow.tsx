@@ -9,12 +9,18 @@ type Props = {
   value: string;
   onChange: (id: string) => void;
   accessibilityLabel: string;
+  /** false keeps chips on one line (e.g. inside a horizontal ScrollView). */
+  wrap?: boolean;
 };
 
 /** Single-select chips (radio group). Every chip is at least 44px tall. */
-export function ChipRow({ options, value, onChange, accessibilityLabel }: Props) {
+export function ChipRow({ options, value, onChange, accessibilityLabel, wrap = true }: Props) {
   return (
-    <View accessibilityRole="radiogroup" accessibilityLabel={accessibilityLabel} className="flex-row flex-wrap gap-2">
+    <View
+      accessibilityRole="radiogroup"
+      accessibilityLabel={accessibilityLabel}
+      className={`flex-row gap-2 ${wrap ? 'flex-wrap' : ''}`}
+    >
       {options.map((o) => {
         const selected = o.id === value;
         return (

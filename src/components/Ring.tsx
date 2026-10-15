@@ -11,6 +11,8 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 type Props = {
   /** 0..1; values above 1 draw a full ring. */
   progress: number;
+  /** Where the first animation starts (e.g. the total before this meal). Defaults to 0. */
+  initial?: number;
   size?: number;
   stroke?: number;
   color?: string;
@@ -19,12 +21,12 @@ type Props = {
 };
 
 /** Progress ring that springs from its previous value to the new one after every save. */
-export function Ring({ progress, size = 200, stroke = 16, color, children, accessibilityLabel }: Props) {
+export function Ring({ progress, initial = 0, size = 200, stroke = 16, color, children, accessibilityLabel }: Props) {
   const { colors } = useTheme();
   const reduced = useReducedMotion();
   const r = (size - stroke) / 2;
   const circumference = 2 * Math.PI * r;
-  const p = useSharedValue(0);
+  const p = useSharedValue(Math.max(0, Math.min(initial, 1)));
 
   useEffect(() => {
     p.value = animateTo(Math.max(0, Math.min(progress, 1)), reduced);

@@ -84,6 +84,8 @@ function Shell() {
           </Stack.Protected>
           <Stack.Protected guard={signedIn && onboarded}>
             <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="scan" options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="paywall" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           </Stack.Protected>
           <Stack.Screen name="dev/components" />
         </Stack>

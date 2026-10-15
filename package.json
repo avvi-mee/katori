@@ -39,6 +39,7 @@
     "@electric-sql/pglite": "^0.5.10",
     "@types/node": "^26.6.5",
     "@types/react": "~19.2.2",
+    "deno": "^2.9.6",
     "prettier": "^3.9.10",
     "supabase": "^2.121.0",
     "tailwindcss": "^3.4.19",
@@ -48,11 +49,12 @@
   "scripts": {
     "start": "expo start",
     "web": "expo start --web",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && deno check --config supabase/functions/deno.json supabase/functions",
     "test": "vitest run",
     "build:web": "expo export --platform web",
     "format": "prettier --write .",
-    "seed:build": "node scripts/build-seed.mjs"
+    "seed:build": "node scripts/build-seed.mjs",
+    "shared:sync": "node scripts/sync-shared.mjs"
   },
   "private": true
 }

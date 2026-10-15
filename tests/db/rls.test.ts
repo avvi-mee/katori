@@ -207,6 +207,19 @@ describe('RLS', () => {
     expect(ok.affectedRows).toBe(1);
   });
 
+  it('bump_usage: service-only, and increments atomically', async () => {
+    await expect(
+      asUser(db, A, (tx) => tx.query(`select bump_usage('${A}'::uuid, current_date + 3, 1)`)),
+    ).rejects.toThrow(/permission denied/);
+    await db.query(`select bump_usage($1::uuid, current_date + 3, 1)`, [B]);
+    await db.query(`select bump_usage($1::uuid, current_date + 3, 1, 2)`, [B]);
+    const { rows } = await db.query<{ scans: number; text_logs: number }>(
+      `select scans, text_logs from usage where user_id = $1 and day = current_date + 3`,
+      [B],
+    );
+    expect(rows[0]).toEqual({ scans: 2, text_logs: 2 });
+  });
+
   it('new auth users get a profile automatically', async () => {
     const C = '00000000-0000-4000-8000-00000000000c';
     await db.query(`insert into auth.users (id, raw_user_meta_data) values ($1, '{"full_name":"Ravi"}')`, [C]);

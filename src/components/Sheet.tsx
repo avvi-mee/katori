@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Modal, Pressable, View } from 'react-native';
+import { Modal, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,6 +18,7 @@ type Props = { open: boolean; onClose: () => void; title?: string; children: Rea
 export function Sheet({ open, onClose, title, children }: Props) {
   const reduced = useReducedMotion();
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const [mounted, setMounted] = useState(open);
   const y = useSharedValue(OFFSCREEN);
   const backdrop = useSharedValue(0);
@@ -71,7 +72,14 @@ export function Sheet({ open, onClose, title, children }: Props) {
                     {title}
                   </Text>
                 ) : null}
-                {children}
+                {/* Tall content scrolls instead of pushing the primary action off small screens. */}
+                <ScrollView
+                  style={{ maxHeight: height * 0.85 - 120 }}
+                  keyboardShouldPersistTaps="handled"
+                  bounces={false}
+                >
+                  {children}
+                </ScrollView>
               </View>
             </Animated.View>
           </View>

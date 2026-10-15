@@ -1,8 +1,9 @@
+import { router } from 'expo-router';
+
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
-import { toast } from '@/components/Toast';
 import { useProfile } from '@/features/auth/profile';
 import { t, useLocale } from '@/lib/i18n';
 
@@ -25,7 +26,7 @@ export default function Today() {
           }
           action={{
             label: t('empty.meals.action'),
-            onPress: () => toast({ message: 'Scanning arrives in the next step.' }),
+            onPress: () => router.push('/scan/camera'),
           }}
         />
       </Card>
