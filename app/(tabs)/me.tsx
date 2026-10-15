@@ -22,6 +22,7 @@ import { PERSONAS, personaMeta } from '@/features/personas/personas';
 import { SavageSwitch } from '@/features/personas/SavageSwitch';
 import { disablePush, enablePush, pushEnabled } from '@/features/pwa/pwa';
 import { callFunction, errorText } from '@/lib/api';
+import { isDemo } from '@/lib/demo';
 import { setLocale, t, useLocale, type Locale } from '@/lib/i18n';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -228,6 +229,11 @@ export default function Me() {
         )}
       </Section>
 
+      {isDemo ? (
+        <View className="rounded-card bg-accent-soft p-3">
+          <Text variant="label">{t('demo.badge')}</Text>
+        </View>
+      ) : null}
       <Text variant="caption">{t('me.privacy')}</Text>
       <Button label={t('me.signOut')} variant="secondary" onPress={signOut} />
       <Button label={t('me.delete')} variant="danger" onPress={() => setConfirm('delete')} />

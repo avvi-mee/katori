@@ -224,6 +224,10 @@ const en = {
   'me.saved': 'Saved',
   'theme.system': 'System',
   'sync.done': 'Synced {n} offline change(s)',
+  'demo.signIn':
+    'Demo mode: use any email and the code 123456. Data stays in this browser; scans return a sample thali (or the dishes you type in the note).',
+  'demo.noGoogle': 'Google sign-in needs the real backend. Use email + 123456 in demo mode.',
+  'demo.badge': 'Demo mode · data stays in this browser',
   'install.title': 'Add Katori to your home screen',
   'install.body': 'Opens like an app, works offline, and brings your coach’s evening summary.',
   'install.cta': 'Install',

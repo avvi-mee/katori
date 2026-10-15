@@ -12,6 +12,7 @@ import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
 import { toast } from '@/components/Toast';
 import { t, useLocale } from '@/lib/i18n';
+import { isDemo } from '@/lib/demo';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 
 const EmailForm = z.object({ email: z.string().trim().email() });
@@ -53,6 +54,7 @@ export default function SignIn() {
   };
 
   const google = async () => {
+    if (isDemo) return toast({ message: t('demo.noGoogle') });
     const redirectTo = Platform.OS === 'web' ? window.location.origin : undefined;
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
     if (error) toast({ message: error.message, tone: 'error' });
@@ -67,6 +69,12 @@ export default function SignIn() {
           {t('auth.tagline')}
         </Text>
       </View>
+
+      {isDemo ? (
+        <View className="rounded-card bg-accent-soft p-4">
+          <Text variant="label">{t('demo.signIn')}</Text>
+        </View>
+      ) : null}
 
       {!supabaseConfigured ? (
         <View className="rounded-card bg-accent-soft p-4">

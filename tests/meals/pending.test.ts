@@ -40,7 +40,9 @@ describe('buildPending', () => {
       draft_id: 'd1',
       source_guess: 'unknown',
       unmatched: [],
-      items: [{ key: 'dal', dish: 'Dal Tadka', food_item_id: DAL.id, unit: 'katori', qty: 1, confidence: 0.6, cooked: true }],
+      items: [
+        { key: 'dal', dish: 'Dal Tadka', food_item_id: DAL.id, unit: 'katori', qty: 1, confidence: 0.6, cooked: true },
+      ],
       questions: [
         {
           id: 'dal:portion',
@@ -65,11 +67,19 @@ describe('buildPending', () => {
 
   it('returns null when it cannot compute anything locally', () => {
     expect(
-      buildPending({ client_id: 'c3', draft_id: 'other', answers: [] }, { foods: [DAL], ctx, draft: null, draftMealType: 'lunch' }),
+      buildPending(
+        { client_id: 'c3', draft_id: 'other', answers: [] },
+        { foods: [DAL], ctx, draft: null, draftMealType: 'lunch' },
+      ),
     ).toBeNull();
     expect(
       buildPending(
-        { client_id: 'c4', meal_type: 'lunch', source: 'home', items: [{ food_item_id: 'unknown', unit: 'g', qty: 100 }] },
+        {
+          client_id: 'c4',
+          meal_type: 'lunch',
+          source: 'home',
+          items: [{ food_item_id: 'unknown', unit: 'g', qty: 100 }],
+        },
         { foods: [DAL], ctx, draft: null, draftMealType: 'lunch' },
       ),
     ).toBeNull();

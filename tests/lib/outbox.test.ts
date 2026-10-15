@@ -2,7 +2,16 @@ import 'fake-indexeddb/auto';
 
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { backoff, clearOutbox, enqueue, flush, listOutbox, PermanentError, useOutbox, type OutboxOp } from '@/lib/outbox';
+import {
+  backoff,
+  clearOutbox,
+  enqueue,
+  flush,
+  listOutbox,
+  PermanentError,
+  useOutbox,
+  type OutboxOp,
+} from '@/lib/outbox';
 
 const save = (n: number): OutboxOp => ({ kind: 'confirm-meal', body: { client_id: `c${n}` }, pending: null });
 

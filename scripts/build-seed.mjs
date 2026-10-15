@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const CSV_PATH = join(root, 'supabase', 'seed', 'food_items.csv');
 const OUT = join(root, 'supabase', 'migrations', '20261015000400_seed_food_items.sql');
+// Same rows for the in-browser demo backend (src/features/demo), with stable ids.
+const DEMO_OUT = join(root, 'src', 'features', 'demo', 'food_items.json');
 
 const UNITS = ['katori', 'roti', 'piece', 'plate', 'scoop', 'glass', 'tbsp', 'g'];
 const num = (s) => (s === '' || s === undefined ? null : Number(s));
@@ -81,5 +83,10 @@ on conflict (slug) do update set
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const rows = parseSeed();
   writeFileSync(OUT, toSql(rows));
+  const demo = rows.map(({ unitsValid, source, is_verified, ...r }, i) => ({
+    id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
+    ...r,
+  }));
+  writeFileSync(DEMO_OUT, JSON.stringify(demo));
   console.log(`wrote ${rows.length} food_items (${rows.filter((r) => r.kind === 'dish').length} dishes) to ${OUT}`);
 }

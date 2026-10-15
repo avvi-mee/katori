@@ -222,7 +222,9 @@ describe('RLS', () => {
 
   it('scan_logs / scan_costs_daily are not readable by app users', async () => {
     await expect(asUser(db, A, (tx) => tx.query(`select * from scan_logs`))).rejects.toThrow(/permission denied/);
-    await expect(asUser(db, A, (tx) => tx.query(`select * from scan_costs_daily`))).rejects.toThrow(/permission denied/);
+    await expect(asUser(db, A, (tx) => tx.query(`select * from scan_costs_daily`))).rejects.toThrow(
+      /permission denied/,
+    );
     const { rows } = await db.query<{ scans: string }>(`select sum(scans)::text as scans from scan_costs_daily`);
     expect(Number(rows[0]?.scans)).toBeGreaterThan(0);
   });

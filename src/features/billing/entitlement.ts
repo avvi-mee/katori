@@ -4,6 +4,7 @@ import { create } from 'zustand';
 
 import { useSession } from '@/features/auth/session';
 import { track } from '@/lib/analytics';
+import { isDemo } from '@/lib/demo';
 import { supabase } from '@/lib/supabase';
 
 export type Subscription = {
@@ -53,7 +54,7 @@ export function useLiveEntitlement() {
   const wasActive = useRef<boolean | null>(null);
 
   useEffect(() => {
-    if (!uid) return;
+    if (!uid || isDemo) return; // the demo backend has no Realtime
     const channel = supabase
       .channel(`subscription-${uid}`)
       .on(
