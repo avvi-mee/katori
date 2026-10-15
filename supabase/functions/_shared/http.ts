@@ -1,3 +1,4 @@
+import * as Sentry from 'npm:@sentry/deno@9.47.2';
 import { createClient, type SupabaseClient, type User } from 'npm:@supabase/supabase-js@2.117.3';
 import type { z } from 'npm:zod@4.6.7';
 
@@ -69,6 +70,17 @@ export async function readBody<T>(req: Request, schema: z.ZodType<T>): Promise<T
   return parsed.data;
 }
 
+const sentryDsn = Deno.env.get('SENTRY_DSN');
+if (sentryDsn) Sentry.init({ dsn: sentryDsn, sendDefaultPii: false, tracesSampleRate: 0 });
+
+/** Unexpected (non-contract) errors go to Sentry; never includes request bodies. */
+export async function reportError(e: unknown, fn: string) {
+  console.error(fn, e);
+  if (!sentryDsn) return;
+  Sentry.captureException(e, { tags: { function: fn } });
+  await Sentry.flush(2000);
+}
+
 /** Wraps a POST handler with CORS, the error contract and logging. */
 export function serve(handler: (req: Request) => Promise<Response>) {
   Deno.serve(async (req) => {
@@ -78,7 +90,7 @@ export function serve(handler: (req: Request) => Promise<Response>) {
       return await handler(req);
     } catch (e) {
       if (e instanceof HttpError) return json({ error: { code: e.code, message: e.message } }, STATUS[e.code]);
-      console.error(e);
+      await reportError(e, new URL(req.url).pathname.split('/').pop() ?? 'function');
       return json({ error: { code: 'INTERNAL', message: 'Something went wrong.' } }, 500);
     }
   });

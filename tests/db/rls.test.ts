@@ -220,6 +220,13 @@ describe('RLS', () => {
     expect(rows[0]).toEqual({ scans: 2, text_logs: 2 });
   });
 
+  it('scan_logs / scan_costs_daily are not readable by app users', async () => {
+    await expect(asUser(db, A, (tx) => tx.query(`select * from scan_logs`))).rejects.toThrow(/permission denied/);
+    await expect(asUser(db, A, (tx) => tx.query(`select * from scan_costs_daily`))).rejects.toThrow(/permission denied/);
+    const { rows } = await db.query<{ scans: string }>(`select sum(scans)::text as scans from scan_costs_daily`);
+    expect(Number(rows[0]?.scans)).toBeGreaterThan(0);
+  });
+
   it('new auth users get a profile automatically', async () => {
     const C = '00000000-0000-4000-8000-00000000000c';
     await db.query(`insert into auth.users (id, raw_user_meta_data) values ($1, '{"full_name":"Ravi"}')`, [C]);

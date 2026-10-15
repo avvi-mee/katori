@@ -1,12 +1,22 @@
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { QueryClient } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
+
+import { ApiError } from './api';
+import { captureError } from './sentry';
 
 import { idbStorage } from './storage';
 
 const WEEK = 7 * 24 * 3600_000;
 
+// Designed error codes (quota, bad photo, offline…) are expected; anything else goes to Sentry.
+const report = (e: unknown) => {
+  if (!(e instanceof ApiError) || e.code === 'INTERNAL') captureError(e);
+};
+
 export const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 2, gcTime: WEEK } },
+  queryCache: new QueryCache({ onError: report }),
+  mutationCache: new MutationCache({ onError: report }),
 });
 
 /** Today's meals, targets and the dish table survive reloads and offline launches (IndexedDB). */

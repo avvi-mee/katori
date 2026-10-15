@@ -27,7 +27,9 @@ import { startSync } from '@/features/meals/sync';
 import { InstallSheet } from '@/features/pwa/InstallSheet';
 import { registerServiceWorker } from '@/features/pwa/pwa';
 import { loadPendingScans } from '@/features/scan/pendingScans';
+import { identify, initAnalytics } from '@/lib/analytics';
 import { setLocale } from '@/lib/i18n';
+import { initSentry, setErrorUser } from '@/lib/sentry';
 import { loadOutbox } from '@/lib/outbox';
 import { persistOptions, queryClient } from '@/lib/query';
 
@@ -48,6 +50,12 @@ export default function RootLayout() {
   }, [loaded, error]);
 
   useEffect(registerServiceWorker, []);
+
+  // Error tracking and analytics load after first paint so they never slow startup.
+  useEffect(() => {
+    void initSentry();
+    void initAnalytics();
+  }, []);
 
   if (!loaded && !error) return null;
 
@@ -74,6 +82,12 @@ function Shell() {
   useEffect(() => {
     if (profile.data?.locale) setLocale(profile.data.locale);
   }, [profile.data?.locale]);
+
+  const uid = session?.user.id ?? null;
+  useEffect(() => {
+    identify(uid);
+    setErrorUser(uid);
+  }, [uid]);
 
   // Offline saves wait in the outbox; replay them whenever we're signed in and online.
   useEffect(() => {

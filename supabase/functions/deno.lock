@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@std/encoding@1": "1.0.11",
     "npm:@anthropic-ai/sdk@0.131.0": "0.131.0_zod@4.6.7",
+    "npm:@sentry/deno@9.47.2": "9.47.2",
     "npm:@supabase/supabase-js@2.117.3": "2.117.3",
     "npm:web-push@3.6.7": "3.6.7",
     "npm:zod@4.6.7": "4.6.7"
@@ -27,6 +28,15 @@
     },
     "@babel/runtime@7.29.10": {
       "integrity": "sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA=="
+    },
+    "@sentry/core@9.47.2": {
+      "integrity": "sha512-WYEP2ZHkTQMP7Gg5frzrQy1475TnK5Qv8wgvHiTlNerYaEBCNpAeWjUltTgfCQ8Hbv1iq4inca7Kqmmyv9gLnQ=="
+    },
+    "@sentry/deno@9.47.2": {
+      "integrity": "sha512-BIS8Xu22YfSOHnHjbOh2GM/xTpqSxKeg8oIy9NPA8FqQEZVPIqUSyOuvuVInNtmGzZbhzlgJjiMF60v+4EHA/g==",
+      "dependencies": [
+        "@sentry/core"
+      ]
     },
     "@stablelib/base64@1.0.1": {
       "integrity": "sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ=="

@@ -9,7 +9,7 @@ import {
   type BillingEvent,
 } from '../_shared/gen/features/billing/webhook.ts';
 import { planIds, productIds } from '../_shared/billing.ts';
-import { adminClient, json } from '../_shared/http.ts';
+import { adminClient, json, reportError } from '../_shared/http.ts';
 
 const ok = (body: Record<string, unknown> = { ok: true }) => json(body, 200);
 
@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
     { onConflict: 'user_id' },
   );
   if (error) {
-    console.error('subscription upsert failed', error);
+    await reportError(error, 'payments-webhook');
     return json({ error: { code: 'INTERNAL', message: 'retry' } }, 500);
   }
   return ok();
