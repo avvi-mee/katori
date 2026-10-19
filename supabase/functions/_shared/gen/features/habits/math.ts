@@ -6,7 +6,8 @@ export type HabitKind = 'smoking' | 'water' | 'sleep' | 'alcohol' | 'junk' | 'su
 export type HabitLog = { logged_at: string; value: number };
 
 /** Limit habits are "less is better" (a daily cap); the rest are goals to reach. */
-export const isLimitHabit = (kind: HabitKind) => kind === 'smoking' || kind === 'alcohol' || kind === 'junk' || kind === 'sugar';
+export const isLimitHabit = (kind: HabitKind) =>
+  kind === 'smoking' || kind === 'alcohol' || kind === 'junk' || kind === 'sugar';
 
 /** Sum of logged values per IST day. */
 export function perDay(logs: HabitLog[]): Map<string, number> {
@@ -33,7 +34,12 @@ export function smokeFreeDays(logs: HabitLog[], trackingSince: string, today: st
 }
 
 /** Cigarettes not smoked since tracking started: Σ max(0, baseline − smoked) over completed days (today included). */
-export function cigarettesAvoided(logs: HabitLog[], baselinePerDay: number, trackingSince: string, today: string): number {
+export function cigarettesAvoided(
+  logs: HabitLog[],
+  baselinePerDay: number,
+  trackingSince: string,
+  today: string,
+): number {
   if (!baselinePerDay) return 0;
   const days = perDay(logs);
   let avoided = 0;

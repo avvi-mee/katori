@@ -117,3 +117,70 @@ describe('parseMealText', () => {
     ]);
   });
 });
+
+describe('demo backend: Phase 1B tables', () => {
+  it('serves the exercise library and templates, paged like PostgREST', async () => {
+    const sb = client();
+    await sb.auth.verifyOtp({ email: 'asha@test.dev', token: DEMO_CODE, type: 'email' });
+    const page1 = await sb.from('exercises').select('id, name').order('name').range(0, 499);
+    const page2 = await sb.from('exercises').select('id, name').order('name').range(500, 999);
+    expect(page1.data).toHaveLength(500);
+    expect(page1.data!.length + page2.data!.length).toBeGreaterThan(870);
+    const templates = await sb.from('workout_templates').select('*').order('position');
+    expect(templates.data!.map((t) => t.name)).toContain('Push');
+    const items = await sb.from('template_exercises').select('*').eq('template_id', templates.data![0]!.id);
+    expect(items.data!.every((i) => typeof i.exercise_id === 'string')).toBe(true);
+  });
+
+  it('upserts workouts and sets, records PRs like the trigger, and keeps them private to the demo user', async () => {
+    const sb = client();
+    await sb.auth.verifyOtp({ email: 'asha@test.dev', token: DEMO_CODE, type: 'email' });
+    const bench = (await sb.from('exercises').select('id').eq('slug', 'Barbell_Bench_Press_-_Medium_Grip').single())
+      .data!.id;
+    const save = async (w: string, day: string, sets: [number, number][]) => {
+      await sb.from('workouts').upsert([{ id: w, user_id: 'u', started_at: `${day}T10:00:00Z` }], { onConflict: 'id' });
+      await sb.from('workout_sets').upsert(
+        sets.map(([kg, reps], n) => ({
+          id: `${w}-${n}`,
+          workout_id: w,
+          exercise_id: bench,
+          set_no: n + 1,
+          kind: 'working',
+          kg,
+          reps,
+          done_at: `${day}T10:0${n}:00Z`,
+        })),
+        { onConflict: 'id' },
+      );
+    };
+    await save('w1', '2026-10-01', [
+      [60, 8],
+      [60, 8],
+    ]);
+    expect((await sb.from('personal_records').select('*')).data).toEqual([]);
+    await save('w2', '2026-10-04', [[65, 6]]);
+    const prs = (await sb.from('personal_records').select('kind')).data!.map((p) => p.kind).sort();
+    expect(prs).toEqual(['e1rm', 'weight']);
+    // Replaying the same upsert is idempotent.
+    await save('w2', '2026-10-04', [[65, 6]]);
+    expect((await sb.from('workout_sets').select('id')).data).toHaveLength(3);
+    expect((await sb.from('personal_records').insert({ kind: 'weight' })).error).toBeTruthy();
+  });
+
+  it('upserts composite-key rows (steps per day) and deletes by filter', async () => {
+    const sb = client();
+    await sb.auth.verifyOtp({ email: 'asha@test.dev', token: DEMO_CODE, type: 'email' });
+    await sb
+      .from('activity_days')
+      .upsert([{ user_id: 'u', date: '2026-10-05', steps: 4000 }], { onConflict: 'user_id,date' });
+    await sb
+      .from('activity_days')
+      .upsert([{ user_id: 'u', date: '2026-10-05', steps: 9000 }], { onConflict: 'user_id,date' });
+    expect((await sb.from('activity_days').select('*')).data).toEqual([
+      { user_id: 'u', date: '2026-10-05', steps: 9000 },
+    ]);
+    await sb.from('habit_logs').upsert([{ id: 'l1', habit_id: 'h', value: 1 }], { onConflict: 'id' });
+    await sb.from('habit_logs').delete().match({ id: 'l1' });
+    expect((await sb.from('habit_logs').select('*')).data).toEqual([]);
+  });
+});

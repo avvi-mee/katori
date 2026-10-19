@@ -17,9 +17,12 @@ import {
   type PortionContext,
   type Usual,
 } from '@/features/portions/engine';
+import { detectPrs, type HistorySet } from '@/features/workouts/math';
 import { istDay, istDayRange } from '@/lib/day';
+import { applyOp, PRIMARY_KEY, type SyncTable } from '@/lib/outbox';
 import type { DraftItem, MealSource, MealType, Question, Unit } from '@/types/meal';
 
+import exercisesJson from './exercises.json';
 import foodsJson from './food_items.json';
 
 type FoodRow = Food & { slug: string; aliases: string[]; kind: string; cuisine: string | null; region: string | null };
@@ -38,10 +41,21 @@ type Db = {
   drafts: Row[];
   usage: Row[];
   subscription: Row | null;
+  /** Phase 1B tables (workouts, habits, activity, body, goals, custom exercises and templates). */
+  tables: Partial<Record<SyncTable | 'personal_records', Row[]>>;
 };
 
 const KEY = 'katori-demo-db';
-const empty = (): Db => ({ profile: null, meals: [], usual: [], coach: [], drafts: [], usage: [], subscription: null });
+const empty = (): Db => ({
+  profile: null,
+  meals: [],
+  usual: [],
+  coach: [],
+  drafts: [],
+  usage: [],
+  subscription: null,
+  tables: {},
+});
 let memory: Db | null = null;
 
 function load(): Db {
@@ -113,7 +127,7 @@ const isPro = (db: Db) =>
 function filterRows(rows: Row[], params: URLSearchParams): Row[] {
   let out = rows;
   for (const [key, value] of params) {
-    if (['select', 'order', 'limit', 'on_conflict', 'columns'].includes(key)) continue;
+    if (['select', 'order', 'limit', 'offset', 'on_conflict', 'columns'].includes(key)) continue;
     const [op, ...rest] = value.split('.');
     const v = rest.join('.');
     out = out.filter((r) => {
@@ -134,8 +148,9 @@ function filterRows(rows: Row[], params: URLSearchParams): Row[] {
       out = [...out].sort((a, b) => (String(a[col!]) < String(b[col!]) ? -1 : 1) * (dir === 'desc' ? -1 : 1));
     }
   }
+  const offset = Number(params.get('offset') ?? 0);
   const limit = params.get('limit');
-  return limit ? out.slice(0, Number(limit)) : out;
+  return out.slice(offset, limit ? offset + Number(limit) : undefined);
 }
 
 const respondRows = (rows: Row[], headers: Headers) =>
@@ -179,8 +194,108 @@ function rest(db: Db, table: string, method: string, params: URLSearchParams, he
     case 'push_subscriptions':
       return method === 'GET' ? json([]) : new Response(null, { status: 201 });
     default:
-      return json([]);
+      return table in PRIMARY_KEY || table === 'personal_records'
+        ? userTable(db, table as SyncTable | 'personal_records', method, params, headers, body)
+        : json([]);
   }
+}
+
+// ─── Phase 1B tables ─────────────────────────────────────────────────────────
+type SeedTemplate = {
+  id: string;
+  name: string;
+  split: string;
+  notes: string;
+  exercises: [string, number, number, number, number][];
+};
+const EX = exercisesJson as unknown as { exercises: Row[]; templates: SeedTemplate[] };
+const EX_ID = new Map(EX.exercises.map((e) => [e.slug as string, e.id as string]));
+const LIBRARY: Partial<Record<SyncTable, Row[]>> = {
+  exercises: EX.exercises,
+  workout_templates: EX.templates.map((t, position) => ({
+    id: t.id,
+    owner_id: null,
+    name: t.name,
+    split: t.split,
+    notes: t.notes,
+    position,
+  })),
+  template_exercises: EX.templates.flatMap((t) =>
+    t.exercises.map(([slug, sets, rep_min, rep_max, rest_s], position) => ({
+      template_id: t.id,
+      position,
+      exercise_id: EX_ID.get(slug),
+      sets,
+      rep_min,
+      rep_max,
+      rest_s,
+    })),
+  ),
+};
+
+/** Mirrors the PR trigger: a batch of new sets is checked against every earlier set. */
+function recordPrs(db: Db, sets: Row[]) {
+  const all = (db.tables.workout_sets ?? []) as unknown as HistorySet[];
+  const fresh = new Set(sets.map((s) => s.id));
+  const history = all.filter((s) => !fresh.has((s as unknown as Row).id as string));
+  const session = all.filter((s) => fresh.has((s as unknown as Row).id as string));
+  const workout = session[0]?.workout_id;
+  const prs = (db.tables.personal_records ?? []).filter((p) => !(p.workout_id === workout && p.kind === 'volume'));
+  for (const hit of detectPrs(history, session)) {
+    if (
+      hit.kind !== 'volume' &&
+      prs.some((p) => p.workout_id === workout && p.exercise_id === hit.exercise_id && p.kind === hit.kind)
+    )
+      continue;
+    prs.push({
+      id: crypto.randomUUID(),
+      user_id: USER_ID,
+      workout_id: workout,
+      achieved_at: new Date().toISOString(),
+      ...hit,
+    });
+  }
+  db.tables.personal_records = prs;
+}
+
+function userTable(
+  db: Db,
+  table: SyncTable | 'personal_records',
+  method: string,
+  params: URLSearchParams,
+  headers: Headers,
+  body: Row | null,
+) {
+  const own = (db.tables[table] ??= []);
+  if (method === 'GET') {
+    const library = table === 'personal_records' ? [] : (LIBRARY[table] ?? []);
+    return respondRows(filterRows([...library, ...own], params), headers);
+  }
+  if (table === 'personal_records') return fail('42501', 'permission denied', 403);
+  if (method === 'POST') {
+    const rows = (Array.isArray(body) ? body : [body]).filter(Boolean) as Row[];
+    db.tables[table] = applyOp(own, { kind: 'upsert', table, rows });
+    if (table === 'workout_sets') recordPrs(db, rows);
+    save(db);
+    return new Response(null, { status: 201 });
+  }
+  if (method === 'PATCH') {
+    const hit = new Set(filterRows(own, params));
+    db.tables[table] = own.map((r) => (hit.has(r) ? { ...r, ...body } : r));
+    save(db);
+    return new Response(null, { status: 204 });
+  }
+  if (method === 'DELETE') {
+    const hit = new Set(filterRows(own, params));
+    db.tables[table] = own.filter((r) => !hit.has(r));
+    if (table === 'workouts')
+      db.tables.workout_sets = (db.tables.workout_sets ?? []).filter(
+        (s) => !own.some((w) => hit.has(w) && w.id === s.workout_id),
+      );
+    save(db);
+    return new Response(null, { status: 204 });
+  }
+  return json([]);
 }
 
 // ─── Edge Functions ──────────────────────────────────────────────────────────

@@ -13,7 +13,8 @@ export const volume = (sets: LoggedSet[]): number =>
   sets.filter(counts).reduce((sum, s) => sum + (s.kg ?? 0) * (s.reps ?? 0), 0);
 
 /** Best e1RM in a list of sets (0 when none count). */
-export const bestE1rm = (sets: LoggedSet[]): number => Math.max(0, ...sets.filter(counts).map((s) => e1rm(s.kg!, s.reps!)));
+export const bestE1rm = (sets: LoggedSet[]): number =>
+  Math.max(0, ...sets.filter(counts).map((s) => e1rm(s.kg!, s.reps!)));
 
 const LOWER = new Set(['quadriceps', 'hamstrings', 'glutes', 'calves', 'adductors', 'abductors', 'lower back']);
 
@@ -72,7 +73,8 @@ export type RunKind = 'run' | 'walk' | 'cycle';
 const KCAL_PER_KG_KM: Record<RunKind, [number, number]> = { run: [0.9, 1.1], walk: [0.5, 0.7], cycle: [0.25, 0.35] };
 
 /** Pace in seconds per km. */
-export const paceSecPerKm = (distanceM: number, durationS: number) => (distanceM > 0 ? (durationS / distanceM) * 1000 : 0);
+export const paceSecPerKm = (distanceM: number, durationS: number) =>
+  distanceM > 0 ? (durationS / distanceM) * 1000 : 0;
 
 export const formatPace = (secPerKm: number) => {
   const s = Math.round(secPerKm);
@@ -90,5 +92,52 @@ export const formatDuration = (s: number) => {
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
   const sec = Math.floor(s % 60);
-  return h ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}`;
+  return h
+    ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+    : `${m}:${String(sec).padStart(2, '0')}`;
 };
+
+export type PrKind = 'weight' | 'reps' | 'e1rm' | 'volume';
+export type HistorySet = LoggedSet & { exercise_id: string; workout_id: string };
+export type PrHit = { exercise_id: string; kind: PrKind; value: number; kg: number | null; reps: number | null };
+
+/**
+ * The PRs a session sets against history, mirroring the database trigger (20261016000300_pr_trigger.sql) so
+ * the finish screen can show them offline. Best hit per exercise and kind; the very first working set of an
+ * exercise is a baseline.
+ */
+export function detectPrs(history: HistorySet[], session: HistorySet[]): PrHit[] {
+  const seen = history.filter(counts);
+  const best = new Map<string, PrHit>();
+  const hit = (h: PrHit) => {
+    const k = `${h.exercise_id}|${h.kind}`;
+    if (!best.has(k) || best.get(k)!.value < h.value) best.set(k, h);
+  };
+  for (const s of session.filter(counts)) {
+    const prior = seen.filter((p) => p.exercise_id === s.exercise_id);
+    if (prior.length) {
+      const kg = s.kg!;
+      const reps = s.reps!;
+      if (kg > Math.max(...prior.map((p) => p.kg!)))
+        hit({ exercise_id: s.exercise_id, kind: 'weight', value: kg, kg, reps });
+      const atKg = prior.filter((p) => p.kg === kg).map((p) => p.reps!);
+      if (atKg.length && reps > Math.max(...atKg))
+        hit({ exercise_id: s.exercise_id, kind: 'reps', value: reps, kg, reps });
+      const e = Math.round(e1rm(kg, reps) * 100) / 100;
+      if (e > Math.max(...prior.map((p) => e1rm(p.kg!, p.reps!))))
+        hit({ exercise_id: s.exercise_id, kind: 'e1rm', value: e, kg, reps });
+    }
+    seen.push(s);
+  }
+  // Session volume per exercise vs the best earlier workout.
+  for (const ex of new Set(session.map((s) => s.exercise_id))) {
+    const byWorkout = new Map<string, number>();
+    for (const p of history)
+      if (p.exercise_id === ex && counts(p))
+        byWorkout.set(p.workout_id, (byWorkout.get(p.workout_id) ?? 0) + p.kg! * p.reps!);
+    if (!byWorkout.size) continue;
+    const v = volume(session.filter((s) => s.exercise_id === ex));
+    if (v > Math.max(...byWorkout.values())) hit({ exercise_id: ex, kind: 'volume', value: v, kg: null, reps: null });
+  }
+  return [...best.values()];
+}

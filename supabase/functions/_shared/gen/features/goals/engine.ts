@@ -70,7 +70,12 @@ export type ScoreInputs = {
   habits: { name: string; adherence: number }[];
 };
 
-export type ScorePart = { key: 'food' | 'training' | 'activity' | 'habits'; weight: number; earned: number; note: string };
+export type ScorePart = {
+  key: 'food' | 'training' | 'activity' | 'habits';
+  weight: number;
+  earned: number;
+  note: string;
+};
 export type DailyScore = { score: number; parts: ScorePart[]; movedBy: string[] };
 
 const BASE = { food: 40, training: 25, activity: 15, habits: 20 } as const;
@@ -102,7 +107,8 @@ export function dailyScore(i: ScoreInputs): DailyScore {
   const foodShare =
     i.food.meals === 0
       ? 0
-      : 0.6 * kcalAdherence(i.food.kcal, i.targets.kcal) + 0.4 * Math.min(1, i.food.protein_g / Math.max(1, i.targets.protein_g));
+      : 0.6 * kcalAdherence(i.food.kcal, i.targets.kcal) +
+        0.4 * Math.min(1, i.food.protein_g / Math.max(1, i.targets.protein_g));
   const activityShare = Math.min(1, (i.steps ?? 0) / Math.max(1, i.targets.steps));
   const habitShare = hasHabits ? i.habits.reduce((a, h) => a + h.adherence, 0) / i.habits.length : 0;
 
@@ -111,7 +117,10 @@ export function dailyScore(i: ScoreInputs): DailyScore {
       key: 'food',
       weight: raw.food * scale,
       earned: raw.food * scale * foodShare,
-      note: i.food.meals === 0 ? 'no meals logged' : `${Math.round(i.food.kcal)} / ${i.targets.kcal} kcal, ${Math.round(i.food.protein_g)} g protein`,
+      note:
+        i.food.meals === 0
+          ? 'no meals logged'
+          : `${Math.round(i.food.kcal)} / ${i.targets.kcal} kcal, ${Math.round(i.food.protein_g)} g protein`,
     },
     ...(training
       ? [
@@ -127,7 +136,10 @@ export function dailyScore(i: ScoreInputs): DailyScore {
       key: 'activity',
       weight: raw.activity * scale,
       earned: raw.activity * scale * activityShare,
-      note: i.steps == null ? 'no steps logged' : `${i.steps.toLocaleString('en-IN')} / ${i.targets.steps.toLocaleString('en-IN')} steps`,
+      note:
+        i.steps == null
+          ? 'no steps logged'
+          : `${i.steps.toLocaleString('en-IN')} / ${i.targets.steps.toLocaleString('en-IN')} steps`,
     },
     ...(hasHabits
       ? [
@@ -197,7 +209,9 @@ export function weeklyRecalc(o: {
   const desiredPerDay = ((WEEKLY_RATE[o.goal ?? ''] ?? 0) * bodyKg * KCAL_PER_KG) / 7;
   const ideal = tdee + desiredPerDay;
   const maxStep = o.currentKcal * 0.1;
-  const next = Math.round(Math.max(o.floor, Math.min(o.currentKcal + maxStep, Math.max(o.currentKcal - maxStep, ideal))) / 10) * 10;
+  const next =
+    Math.round(Math.max(o.floor, Math.min(o.currentKcal + maxStep, Math.max(o.currentKcal - maxStep, ideal))) / 10) *
+    10;
   if (Math.abs(next - o.currentKcal) < 50) return null;
   const trend = slope * 7;
   return {

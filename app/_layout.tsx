@@ -23,7 +23,7 @@ import { useLiveEntitlement } from '@/features/billing/entitlement';
 import { ProCelebration } from '@/features/billing/ProCelebration';
 import { useProfile } from '@/features/auth/profile';
 import { useSession } from '@/features/auth/session';
-import { startSync } from '@/features/meals/sync';
+import { startSync } from '@/lib/sync';
 import { InstallSheet } from '@/features/pwa/InstallSheet';
 import { registerServiceWorker } from '@/features/pwa/pwa';
 import { loadPendingScans } from '@/features/scan/pendingScans';

@@ -16,9 +16,68 @@ export type PendingMeal = {
   totals: Totals;
 };
 
+/** Owner-writable tables whose rows carry device-generated keys, so replays upsert safely. */
+export type SyncTable =
+  | 'workouts'
+  | 'workout_sets'
+  | 'exercises'
+  | 'workout_templates'
+  | 'template_exercises'
+  | 'activity_days'
+  | 'runs'
+  | 'habits'
+  | 'habit_logs'
+  | 'goals'
+  | 'body_logs'
+  | 'weights';
+
 export type OutboxOp =
   | { kind: 'confirm-meal'; body: Record<string, unknown>; pending: PendingMeal | null }
-  | { kind: 'delete-meal'; mealId: string };
+  | { kind: 'delete-meal'; mealId: string }
+  | { kind: 'upsert'; table: SyncTable; rows: Record<string, unknown>[] }
+  | { kind: 'delete'; table: SyncTable; match: Record<string, string> };
+
+/** Primary keys of the synced tables: upserts conflict on these, local overlays merge on them. */
+export const PRIMARY_KEY: Record<SyncTable, string[]> = {
+  workouts: ['id'],
+  workout_sets: ['id'],
+  exercises: ['id'],
+  workout_templates: ['id'],
+  template_exercises: ['template_id', 'position'],
+  activity_days: ['user_id', 'date'],
+  runs: ['id'],
+  habits: ['id'],
+  habit_logs: ['id'],
+  goals: ['user_id'],
+  body_logs: ['id'],
+  weights: ['user_id', 'date'],
+};
+
+type Row = Record<string, unknown>;
+export type TableOp = Extract<OutboxOp, { kind: 'upsert' | 'delete' }>;
+const keyOf = (table: SyncTable, r: Row) => PRIMARY_KEY[table].map((c) => String(r[c])).join('|');
+
+/** Applies one upsert/delete to a list of rows (upserts merge into an existing row with the same key). */
+export function applyOp<T extends Row>(rows: T[], op: TableOp, mark = false): T[] {
+  if (op.kind === 'delete') return rows.filter((r) => !Object.entries(op.match).every(([k, v]) => String(r[k]) === v));
+  const out = [...rows];
+  for (const row of op.rows) {
+    const k = keyOf(op.table, row);
+    const at = out.findIndex((r) => keyOf(op.table, r) === k);
+    const next = { ...(at >= 0 ? out[at] : {}), ...row, ...(mark ? { pending: true } : {}) } as T;
+    if (at >= 0) out[at] = next;
+    else out.push(next);
+  }
+  return out;
+}
+
+/** Server rows plus the queued writes for this table, in queue order. */
+export function overlay<T extends Row>(table: SyncTable, rows: T[], outbox: OutboxItem[]): T[] {
+  let out = rows;
+  for (const { op } of outbox)
+    if ((op.kind === 'upsert' || op.kind === 'delete') && op.table === table) out = applyOp(out, op, true);
+  return out;
+}
 
 export type OutboxItem = { id: string; op: OutboxOp; created_at: number; attempts: number; next_at: number };
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   bestE1rm,
+  detectPrs,
   deloadHint,
   e1rm,
   formatDuration,
@@ -101,5 +102,33 @@ describe('burn and pace', () => {
     expect(paceSecPerKm(0, 100)).toBe(0);
     expect(formatDuration(65)).toBe('1:05');
     expect(formatDuration(3725)).toBe('1:02:05');
+  });
+});
+
+describe('detectPrs (mirrors the database trigger)', () => {
+  const h = (workout_id: string, kg: number, reps: number, kind: LoggedSet['kind'] = 'working') => ({
+    exercise_id: 'bench',
+    workout_id,
+    kind,
+    kg,
+    reps,
+  });
+
+  it('treats the first sets of an exercise as the baseline', () => {
+    expect(detectPrs([], [h('w1', 20, 12, 'warmup'), h('w1', 60, 8), h('w1', 60, 8)])).toEqual([]);
+  });
+
+  it('finds weight, reps, e1RM and volume PRs, best per kind', () => {
+    const history = [h('w1', 60, 8), h('w1', 60, 8)];
+    const prs = detectPrs(history, [h('w2', 65, 6), h('w2', 60, 10), h('w2', 50, 10)]);
+    const by = Object.fromEntries(prs.map((p) => [p.kind, p]));
+    expect(by.weight).toMatchObject({ value: 65, reps: 6 });
+    expect(by.reps).toMatchObject({ value: 10, kg: 60 });
+    expect(by.e1rm!.value).toBeCloseTo(80, 2);
+    expect(by.volume!.value).toBe(1490);
+  });
+
+  it('ignores warm-ups', () => {
+    expect(detectPrs([h('w1', 60, 8)], [h('w2', 200, 1, 'warmup')])).toEqual([]);
   });
 });
