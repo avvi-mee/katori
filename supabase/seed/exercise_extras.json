@@ -1,0 +1,202 @@
+{
+  "_comment": "Katori additions on top of free-exercise-db (supabase/seed/exercises.json, Unlicense). aliases: Indian gym names people actually type. templates: library programmes (owner_id null). rep ranges are working sets.",
+  "aliases": {
+    "Barbell_Bench_Press_-_Medium_Grip": ["bench press", "flat bench", "flat bench press"],
+    "Leverage_Chest_Press": ["chest press machine", "chest press"],
+    "Machine_Bench_Press": ["machine chest press"],
+    "Incline_Dumbbell_Press": ["incline db press", "incline dumbbell press"],
+    "Dumbbell_Flyes": ["db fly", "flat fly"],
+    "Butterfly": ["pec deck", "pec fly machine", "butterfly machine"],
+    "Cable_Crossover": ["cable fly", "crossover"],
+    "Pushups": ["push ups", "pushup", "dand"],
+    "Dips_-_Triceps_Version": ["dips"],
+    "Wide-Grip_Lat_Pulldown": ["lat pull", "lat pulldown", "lat pull down"],
+    "Seated_Cable_Rows": ["seated row", "cable row"],
+    "Bent_Over_Barbell_Row": ["barbell row", "bent over row"],
+    "One-Arm_Dumbbell_Row": ["db row", "single arm row"],
+    "T-Bar_Row_with_Handle": ["t bar row"],
+    "Pullups": ["pull ups", "pull up"],
+    "Barbell_Deadlift": ["deadlift"],
+    "Romanian_Deadlift": ["rdl"],
+    "Barbell_Squat": ["squat", "back squat"],
+    "Smith_Machine_Squat": ["smith squat"],
+    "Hack_Squat": ["hack squat machine"],
+    "Leg_Press": ["leg press machine"],
+    "Leg_Extensions": ["leg extension"],
+    "Lying_Leg_Curls": ["leg curl", "hamstring curl"],
+    "Standing_Calf_Raises": ["calf raise", "calf raises"],
+    "Barbell_Shoulder_Press": ["military press", "overhead press", "ohp"],
+    "Dumbbell_Shoulder_Press": ["db shoulder press", "shoulder press"],
+    "Side_Lateral_Raise": ["lateral raise", "side raise"],
+    "Reverse_Flyes": ["rear delt fly", "reverse fly"],
+    "Face_Pull": ["face pulls"],
+    "Barbell_Shrug": ["shrugs", "shrug"],
+    "Barbell_Curl": ["bb curl", "biceps curl barbell"],
+    "Dumbbell_Bicep_Curl": ["db curl", "biceps curl", "bicep curl"],
+    "Hammer_Curls": ["hammer curl"],
+    "Machine_Preacher_Curls": ["preacher curl machine", "preacher curl"],
+    "Triceps_Pushdown": ["tricep pushdown", "triceps pushdown"],
+    "Triceps_Pushdown_-_Rope_Attachment": ["rope pushdown"],
+    "Lying_Triceps_Press": ["skull crusher", "skull crushers"],
+    "Hanging_Leg_Raise": ["leg raise"],
+    "Dumbbell_Lunges": ["lunges"],
+    "Goblet_Squat": ["goblet"],
+    "Running_Treadmill": ["treadmill run", "treadmill"],
+    "Walking_Treadmill": ["treadmill walk"],
+    "Bicycling_Stationary": ["cycle", "cycling machine", "exercise cycle"],
+    "Elliptical_Trainer": ["cross trainer", "elliptical"],
+    "Rowing_Stationary": ["rowing machine"],
+    "Rope_Jumping": ["skipping", "skipping rope"],
+    "Stairmaster": ["stair climber"]
+  },
+  "templates": [
+    {
+      "id": "00000000-0000-4000-a000-000000000001",
+      "name": "Push",
+      "split": "ppl",
+      "notes": "Push / Pull / Legs — chest, shoulders, triceps.",
+      "exercises": [
+        ["Barbell_Bench_Press_-_Medium_Grip", 4, 6, 10, 150],
+        ["Incline_Dumbbell_Press", 3, 8, 12, 120],
+        ["Dumbbell_Shoulder_Press", 3, 8, 12, 120],
+        ["Side_Lateral_Raise", 3, 12, 15, 60],
+        ["Triceps_Pushdown", 3, 10, 15, 60]
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000002",
+      "name": "Pull",
+      "split": "ppl",
+      "notes": "Push / Pull / Legs — back, rear delts, biceps.",
+      "exercises": [
+        ["Barbell_Deadlift", 3, 5, 8, 180],
+        ["Wide-Grip_Lat_Pulldown", 3, 8, 12, 90],
+        ["Seated_Cable_Rows", 3, 8, 12, 90],
+        ["Face_Pull", 3, 12, 15, 60],
+        ["Barbell_Curl", 3, 8, 12, 60],
+        ["Hammer_Curls", 2, 10, 12, 60]
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000003",
+      "name": "Legs",
+      "split": "ppl",
+      "notes": "Push / Pull / Legs — quads, hamstrings, calves.",
+      "exercises": [
+        ["Barbell_Squat", 4, 6, 10, 180],
+        ["Romanian_Deadlift", 3, 8, 10, 120],
+        ["Leg_Press", 3, 10, 15, 120],
+        ["Lying_Leg_Curls", 3, 10, 15, 60],
+        ["Standing_Calf_Raises", 4, 12, 20, 60]
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000004",
+      "name": "Upper",
+      "split": "upper_lower",
+      "notes": "Upper / Lower — 4 days a week.",
+      "exercises": [
+        ["Barbell_Bench_Press_-_Medium_Grip", 4, 6, 10, 150],
+        ["Bent_Over_Barbell_Row", 4, 6, 10, 120],
+        ["Dumbbell_Shoulder_Press", 3, 8, 12, 90],
+        ["Wide-Grip_Lat_Pulldown", 3, 8, 12, 90],
+        ["Dumbbell_Bicep_Curl", 2, 10, 12, 60],
+        ["Triceps_Pushdown", 2, 10, 12, 60]
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000005",
+      "name": "Lower",
+      "split": "upper_lower",
+      "notes": "Upper / Lower — 4 days a week.",
+      "exercises": [
+        ["Barbell_Squat", 4, 6, 10, 180],
+        ["Romanian_Deadlift", 3, 8, 10, 120],
+        ["Leg_Press", 3, 10, 12, 120],
+        ["Leg_Extensions", 3, 12, 15, 60],
+        ["Lying_Leg_Curls", 3, 12, 15, 60],
+        ["Standing_Calf_Raises", 3, 12, 20, 60]
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000006",
+      "name": "Chest day",
+      "split": "bro",
+      "notes": "Bro split — one muscle a day.",
+      "exercises": [
+        ["Barbell_Bench_Press_-_Medium_Grip", 4, 6, 10, 150],
+        ["Incline_Dumbbell_Press", 3, 8, 12, 120],
+        ["Leverage_Chest_Press", 3, 10, 12, 90],
+        ["Butterfly", 3, 12, 15, 60],
+        ["Cable_Crossover", 3, 12, 15, 60]
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000007",
+      "name": "Back day",
+      "split": "bro",
+      "notes": "Bro split — one muscle a day.",
+      "exercises": [
+        ["Barbell_Deadlift", 3, 5, 8, 180],
+        ["Wide-Grip_Lat_Pulldown", 3, 8, 12, 90],
+        ["Bent_Over_Barbell_Row", 3, 8, 10, 120],
+        ["Seated_Cable_Rows", 3, 10, 12, 90],
+        ["One-Arm_Dumbbell_Row", 3, 10, 12, 60]
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000008",
+      "name": "Shoulder day",
+      "split": "bro",
+      "notes": "Bro split — one muscle a day.",
+      "exercises": [
+        ["Barbell_Shoulder_Press", 4, 6, 10, 150],
+        ["Dumbbell_Shoulder_Press", 3, 8, 12, 90],
+        ["Side_Lateral_Raise", 4, 12, 15, 60],
+        ["Reverse_Flyes", 3, 12, 15, 60],
+        ["Barbell_Shrug", 3, 10, 15, 60]
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000009",
+      "name": "Arms day",
+      "split": "bro",
+      "notes": "Bro split — one muscle a day.",
+      "exercises": [
+        ["Barbell_Curl", 3, 8, 12, 60],
+        ["Hammer_Curls", 3, 10, 12, 60],
+        ["Machine_Preacher_Curls", 3, 10, 12, 60],
+        ["Triceps_Pushdown", 3, 10, 15, 60],
+        ["Lying_Triceps_Press", 3, 8, 12, 60],
+        ["Dips_-_Triceps_Version", 3, 8, 12, 90]
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000010",
+      "name": "Leg day",
+      "split": "bro",
+      "notes": "Bro split — one muscle a day.",
+      "exercises": [
+        ["Barbell_Squat", 4, 6, 10, 180],
+        ["Leg_Press", 3, 10, 15, 120],
+        ["Leg_Extensions", 3, 12, 15, 60],
+        ["Lying_Leg_Curls", 3, 12, 15, 60],
+        ["Standing_Calf_Raises", 4, 12, 20, 60]
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000011",
+      "name": "Full body",
+      "split": "full_body",
+      "notes": "Full body — 3 days a week.",
+      "exercises": [
+        ["Barbell_Squat", 3, 5, 8, 180],
+        ["Barbell_Bench_Press_-_Medium_Grip", 3, 5, 8, 150],
+        ["Bent_Over_Barbell_Row", 3, 6, 10, 120],
+        ["Barbell_Shoulder_Press", 2, 8, 10, 90],
+        ["Romanian_Deadlift", 2, 8, 10, 120],
+        ["Hanging_Leg_Raise", 3, 10, 15, 60]
+      ]
+    }
+  ]
+}

@@ -61,7 +61,8 @@
     "build:web": "node scripts/build-web.mjs",
     "format": "prettier --write .",
     "seed:build": "node scripts/build-seed.mjs",
-    "shared:sync": "node scripts/sync-shared.mjs"
+    "shared:sync": "node scripts/sync-shared.mjs",
+    "seed:exercises": "node scripts/build-exercise-seed.mjs"
   },
   "private": true
 }

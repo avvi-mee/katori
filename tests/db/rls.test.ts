@@ -280,6 +280,22 @@ describe('RLS', () => {
     expect(Number(rows[0]?.scans)).toBeGreaterThan(0);
   });
 
+  it('the seeded exercise library and templates are readable by every user', async () => {
+    const counts = await asUser(db, A, async (tx) => ({
+      exercises: (await tx.query<{ n: number }>(`select count(*)::int as n from exercises where owner_id is null`))
+        .rows[0]!.n,
+      templates: (
+        await tx.query<{ n: number }>(
+          `select count(*)::int as n from workout_templates where id::text like '00000000-0000-4000-a000-%'`,
+        )
+      ).rows[0]!.n,
+      items: (await tx.query<{ n: number }>(`select count(*)::int as n from template_exercises`)).rows[0]!.n,
+    }));
+    expect(counts.exercises).toBeGreaterThanOrEqual(873);
+    expect(counts.templates).toBe(11);
+    expect(counts.items).toBeGreaterThanOrEqual(55);
+  });
+
   it('new auth users get a profile automatically', async () => {
     const C = '00000000-0000-4000-8000-00000000000c';
     await db.query(`insert into auth.users (id, raw_user_meta_data) values ($1, '{"full_name":"Ravi"}')`, [C]);
