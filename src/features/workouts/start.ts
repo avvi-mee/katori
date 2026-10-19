@@ -28,14 +28,19 @@ export function startWorkout(template: TemplateWithExercises | null, defaultRest
 }
 
 /**
- * Today's suggested session: the next template in the split the user last trained from (Push → Pull →
- * Legs → Push …); with no history, the first library template.
+ * Today's suggested session: a trainer-assigned plan scheduled for today wins; otherwise the next template in
+ * the split the user last trained from (Push → Pull → Legs → Push …); with no history, the first library one.
  */
 export function suggestTemplate(
   templates: TemplateWithExercises[] | undefined,
   workouts: WorkoutWithSets[] | undefined,
+  weekday = new Date(Date.now() + 330 * 60_000).getUTCDay(),
 ): TemplateWithExercises | null {
   if (!templates?.length) return null;
+  const coachToday = templates.find((x) => x.assigned_by_coach_id && x.plan_weekdays?.includes(weekday));
+  if (coachToday) return coachToday;
+  templates = templates.filter((x) => !x.assigned_by_coach_id);
+  if (!templates.length) return null;
   const last = workouts?.find((w) => w.template_id && templates.some((x) => x.id === w.template_id));
   const lastT = last && templates.find((x) => x.id === last.template_id);
   if (!lastT?.split) return templates[0]!;

@@ -22,6 +22,7 @@ import { signOut, useSession } from '@/features/auth/session';
 import { kcalText } from '@/features/meals/format';
 import { PERSONAS, personaMeta } from '@/features/personas/personas';
 import { SavageSwitch } from '@/features/personas/SavageSwitch';
+import { MyCoachSection } from '@/features/coach/MyCoachSection';
 import { disablePush, enablePush, pushEnabled } from '@/features/pwa/pwa';
 import { callFunction, errorText } from '@/lib/api';
 import { isDemo } from '@/lib/demo';
@@ -73,7 +74,7 @@ export default function Me() {
       toast({ message: t('common.error'), tone: 'error' });
     }
   };
-  const { isPro, subscription } = useEntitlement();
+  const { isPro, subscription, sponsoredBy } = useEntitlement();
   const qc = useQueryClient();
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString('en-IN', {
@@ -220,13 +221,22 @@ export default function Me() {
         />
       </Section>
 
+      <MyCoachSection />
+
       <Section title={t('me.plan')}>
-        {isPro && subscription ? (
+        {sponsoredBy ? (
+          <Text variant="heading">{t('coach.proFromCoach', { name: sponsoredBy })}</Text>
+        ) : isPro && subscription ? (
           <>
             <View>
               <Text variant="heading">
                 {t('me.proActive', {
-                  plan: subscription.plan === 'yearly' ? t('paywall.yearly') : t('paywall.monthly'),
+                  plan:
+                    subscription.plan === 'coach'
+                      ? t('coach.trainerPlan')
+                      : subscription.plan === 'yearly'
+                        ? t('paywall.yearly')
+                        : t('paywall.monthly'),
                 })}
               </Text>
               {periodEnd ? (

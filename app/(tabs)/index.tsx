@@ -17,6 +17,7 @@ import { useTheme } from '@/design/theme';
 import { useProfile } from '@/features/auth/profile';
 import { usePreferences, useTargets } from '@/features/goals/api';
 import { HabitChips, ScoreCard, WorkoutCard } from '@/features/goals/TodayCards';
+import { CoachReviewCard, useCommentCounts } from '@/features/coach/ClientComments';
 import { useDayMeals, useDeleteMeal, useTodayCoach } from '@/features/meals/api';
 import { formatAmount, kcalText } from '@/features/meals/format';
 import { buildCoachMessage } from '@/features/personas/coach';
@@ -49,6 +50,8 @@ export default function Today() {
   }, []);
 
   const visible = (meals.data ?? []).filter((m) => !pending.has(m.id));
+  const synced = visible.filter((m) => !m.pending);
+  const commentCount = useCommentCounts(synced.map((m) => m.id));
   const day = totals(visible);
   const target = targets.kcal;
   const proteinTarget = targets.protein_g;
@@ -149,6 +152,7 @@ export default function Today() {
         />
       </Card>
 
+      <CoachReviewCard meals={synced} />
       {coach.data ? (
         <CoachBubble persona={coach.data.persona} text={coach.data.text} gentle={coach.data.gentle} />
       ) : fallbackCoach && !profile?.nudges_muted ? (
@@ -215,6 +219,7 @@ export default function Today() {
                     {m.meal_items[0] ? formatAmount(m.meal_items[0].qty, m.meal_items[0].unit) : ''}
                     {m.meal_items.length > 1 ? ` +${m.meal_items.length - 1}` : ''} · {Math.round(m.protein_g)} g
                     protein{m.pending ? ` · ${t('sync.pending')}` : ''}
+                    {commentCount(m.id) ? ` · 💬 ${commentCount(m.id)}` : ''}
                   </Text>
                 </View>
                 <Text variant="label">{kcalText(m.kcal)}</Text>

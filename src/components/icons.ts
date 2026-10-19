@@ -23,6 +23,7 @@ export { default as Heart } from 'lucide-react-native/icons/heart';
 export { default as Image } from 'lucide-react-native/icons/image';
 export { default as Link2 } from 'lucide-react-native/icons/link-2';
 export { default as List } from 'lucide-react-native/icons/list';
+export { default as MessageSquare } from 'lucide-react-native/icons/message-square';
 export { default as Minus } from 'lucide-react-native/icons/minus';
 export { default as Moon } from 'lucide-react-native/icons/moon';
 export { default as Pencil } from 'lucide-react-native/icons/pencil';

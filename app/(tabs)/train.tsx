@@ -38,7 +38,8 @@ export default function Train() {
   const prs = usePersonalRecords();
   const now = useNow();
   const suggested = suggestTemplate(templates.data, workouts.data);
-  const mine = templates.data?.filter((x) => x.owner_id) ?? [];
+  const coachPlans = templates.data?.filter((x) => x.assigned_by_coach_id) ?? [];
+  const mine = templates.data?.filter((x) => x.owner_id && !x.assigned_by_coach_id) ?? [];
   const library = templates.data?.filter((x) => !x.owner_id) ?? [];
   const prCount = (id: string) => (prs.data ?? []).filter((p) => p.workout_id === id && p.kind !== 'volume').length;
 
@@ -109,6 +110,7 @@ export default function Train() {
       </PressableScale>
 
       {[
+        { title: t('train.fromCoach'), list: coachPlans },
         { title: t('train.myTemplates'), list: mine },
         { title: t('train.templates'), list: library },
       ].map(({ title, list }) =>

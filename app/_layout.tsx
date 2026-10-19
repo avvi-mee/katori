@@ -8,7 +8,7 @@ import { Manrope_600SemiBold } from '@expo-google-fonts/manrope/600SemiBold';
 import { Manrope_700Bold } from '@expo-google-fonts/manrope/700Bold';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack, type Href } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -23,6 +23,7 @@ import { useLiveEntitlement } from '@/features/billing/entitlement';
 import { ProCelebration } from '@/features/billing/ProCelebration';
 import { useProfile } from '@/features/auth/profile';
 import { useSession } from '@/features/auth/session';
+import { takeAfterAuth } from '@/lib/redirect';
 import { startSync } from '@/lib/sync';
 import { InstallSheet } from '@/features/pwa/InstallSheet';
 import { registerServiceWorker } from '@/features/pwa/pwa';
@@ -99,6 +100,13 @@ function Shell() {
 
   const loading = !ready || (signedIn && profile.isPending);
 
+  // Invite links and /coach start signed out; finish where the person was going.
+  useEffect(() => {
+    if (loading || !signedIn) return;
+    const href = takeAfterAuth();
+    if (href) setTimeout(() => router.push(href as Href), 0);
+  }, [loading, signedIn]);
+
   return (
     <>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
@@ -123,6 +131,8 @@ function Shell() {
             <Stack.Screen name="goals" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="paywall" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           </Stack.Protected>
+          <Stack.Screen name="join/[code]" />
+          <Stack.Screen name="coach" />
           <Stack.Screen name="dev/components" />
         </Stack>
       )}

@@ -28,6 +28,9 @@ export type Template = {
   split: string | null;
   notes: string | null;
   position: number;
+  /** Set when a trainer assigned this plan (Phase 2); plan_weekdays schedules it. */
+  assigned_by_coach_id?: string | null;
+  plan_weekdays?: number[] | null;
 };
 export type TemplateExercise = {
   template_id: string;

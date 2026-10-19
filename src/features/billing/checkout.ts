@@ -30,7 +30,10 @@ function loadRazorpay(): Promise<RazorpayCtor> {
  * Starts checkout with whichever provider the server is configured for. Resolves once the checkout UI is
  * open; Pro unlocks when the payment webhook updates the subscription (see useEntitlement).
  */
-export async function startCheckout(plan: Plan, o: { email?: string; onDismiss?: () => void }): Promise<void> {
+export async function startCheckout(
+  plan: Plan | 'coach',
+  o: { email?: string; onDismiss?: () => void },
+): Promise<void> {
   const checkout = await callFunction<Checkout>('create-subscription', { plan });
   if (checkout.kind === 'redirect') {
     window.location.href = checkout.url;
@@ -41,7 +44,8 @@ export async function startCheckout(plan: Plan, o: { email?: string; onDismiss?:
     key: checkout.key_id,
     subscription_id: checkout.subscription_id,
     name: 'Katori',
-    description: plan === 'yearly' ? 'Katori Pro · Yearly' : 'Katori Pro · Monthly',
+    description:
+      plan === 'coach' ? 'Katori Trainer' : plan === 'yearly' ? 'Katori Pro · Yearly' : 'Katori Pro · Monthly',
     prefill: o.email ? { email: o.email } : undefined,
     theme: { color: '#F26B1D' },
     modal: { ondismiss: o.onDismiss },

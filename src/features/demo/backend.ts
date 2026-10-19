@@ -22,6 +22,7 @@ import { istDay, istDayRange } from '@/lib/day';
 import { applyOp, PRIMARY_KEY, type SyncTable } from '@/lib/outbox';
 import type { DraftItem, MealSource, MealType, Question, Unit } from '@/types/meal';
 
+import { clientFilter, DEMO_COACH, seedClients, type CoachDemo } from './coachDemo';
 import exercisesJson from './exercises.json';
 import foodsJson from './food_items.json';
 
@@ -43,6 +44,10 @@ type Db = {
   subscription: Row | null;
   /** Phase 1B tables (workouts, habits, activity, body, goals, custom exercises and templates). */
   tables: Partial<Record<SyncTable | 'personal_records', Row[]>>;
+  /** Phase 2: demo clients when the user becomes a coach; the demo coach when they accept an invite. */
+  trainer?: CoachDemo;
+  myCoach?: Row | null;
+  comments?: Row[];
 };
 
 const KEY = 'katori-demo-db';
@@ -160,8 +165,130 @@ const respondRows = (rows: Row[], headers: Headers) =>
       : json({ code: 'PGRST116', message: 'JSON object requested, multiple (or no) rows returned' }, 406)
     : json(rows);
 
+// ─── Phase 2: trainer mode ───────────────────────────────────────────────────
+const TRAINER_TABLES: Record<string, keyof CoachDemo> = {
+  profiles: 'profiles',
+  meals: 'meals',
+  workouts: 'workouts',
+  workout_templates: 'templates',
+  activity_days: 'activity',
+  habits: 'habits',
+  weights: 'weights',
+  goals: 'goals',
+};
+const trainerCol = (table: string) =>
+  table === 'profiles' ? 'id' : table === 'workout_templates' ? 'owner_id' : 'user_id';
+
+/** Requests about the demo clients (by user/owner/id filter or a client meal id) are answered from db.trainer. */
+function trainerRows(
+  db: Db,
+  table: string,
+  params: URLSearchParams,
+  method: string,
+  body: Row | null,
+): Response | null {
+  const c = db.trainer;
+  if (!c) return null;
+  if (table === 'personal_records' && clientFilter(c, params, 'user_id').length) return json([]);
+  const key = TRAINER_TABLES[table];
+  if (!key) return null;
+  const rows = c[key];
+  const col = trainerCol(table);
+  if (method === 'POST') {
+    const incoming = (Array.isArray(body) ? body : [body]).filter(Boolean) as Row[];
+    if (!incoming.length || !incoming.every((r) => c.profiles.some((p) => p.id === r[col]))) return null;
+    for (const r of incoming) {
+      const at = table === 'goals' ? rows.findIndex((x) => x.user_id === r.user_id) : -1;
+      if (at >= 0) rows[at] = { ...rows[at], ...r };
+      else rows.push({ ...r, ...(table === 'workout_templates' ? { template_exercises: [] } : {}) });
+    }
+    save(db);
+    return new Response(null, { status: 201 });
+  }
+  if (method === 'DELETE' && table === 'workout_templates') {
+    const id = params.get('id')?.replace(/^eq\./, '');
+    if (!rows.some((r) => r.id === id)) return null;
+    c.templates = rows.filter((r) => r.id !== id);
+    save(db);
+    return new Response(null, { status: 204 });
+  }
+  if (method !== 'GET') return null;
+  const byClient = clientFilter(c, params, col).length > 0;
+  const byMealId = table === 'meals' && rows.some((m) => `eq.${m.id}` === params.get('id'));
+  return byClient || byMealId ? json(filterRows(rows, params)) : null;
+}
+
+function rpc(db: Db, name: string, body: Row | null, headers: Headers) {
+  const one = (row: Row | null) => respondRows(row ? [row] : [], headers);
+  switch (name) {
+    case 'become_coach':
+      if (db.profile)
+        db.profile = {
+          ...db.profile,
+          role: 'coach',
+          name: String(body?.display_name ?? db.profile.name),
+          onboarded_at: db.profile.onboarded_at ?? new Date().toISOString(),
+        };
+      db.trainer ??= seedClients();
+      save(db);
+      return new Response(null, { status: 204 });
+    case 'create_coach_invite':
+      return json('DEMO2345');
+    case 'coach_invite_preview':
+      return json([{ coach_name: DEMO_COACH.name, valid: !db.myCoach }]);
+    case 'accept_coach_invite': {
+      db.myCoach = {
+        link_id: crypto.randomUUID(),
+        coach_id: DEMO_COACH.id,
+        coach_name: DEMO_COACH.name,
+        started_at: new Date().toISOString(),
+      };
+      // A first review on the latest meal, so the "Coach reviewed your lunch" card has something to show.
+      const latest = [...db.meals].sort((a, b) => String(b.eaten_at).localeCompare(String(a.eaten_at)))[0];
+      if (latest)
+        (db.comments ??= []).push({
+          id: crypto.randomUUID(),
+          meal_id: latest.id,
+          author_id: DEMO_COACH.id,
+          body: 'Solid plate! Add a katori of curd for protein.',
+          reaction: 'great',
+          read_at: null,
+          created_at: new Date().toISOString(),
+        });
+      save(db);
+      return json(db.myCoach.link_id);
+    }
+    case 'my_coach':
+      return json(db.myCoach ? [db.myCoach] : []);
+    case 'end_coach_link':
+      db.myCoach = null;
+      save(db);
+      return new Response(null, { status: 204 });
+    case 'my_pro_status':
+      return json([{ pro: isPro(db), sponsored_by: null }]);
+    default:
+      return one(null);
+  }
+}
+
 function rest(db: Db, table: string, method: string, params: URLSearchParams, headers: Headers, body: Row | null) {
+  if (table.startsWith('rpc/')) return rpc(db, table.slice(4), body, headers);
+  const forClients = trainerRows(db, table, params, method, body);
+  if (forClients) return forClients;
   switch (table) {
+    case 'coach_clients':
+      return respondRows(db.profile?.role === 'coach' ? filterRows(db.trainer?.links ?? [], params) : [], headers);
+    case 'coach_billing':
+      return json([]);
+    case 'meal_comments': {
+      if (method === 'PATCH') {
+        const hit = new Set(filterRows(db.comments ?? [], params));
+        db.comments = (db.comments ?? []).map((c) => (hit.has(c) ? { ...c, ...body } : c));
+        save(db);
+        return new Response(null, { status: 204 });
+      }
+      return respondRows(filterRows(db.comments ?? [], params), headers);
+    }
     case 'profiles': {
       if (method === 'PATCH' && db.profile) {
         db.profile = { ...db.profile, ...body, updated_at: new Date().toISOString() };
@@ -594,6 +721,20 @@ async function fn(db: Db, name: string, body: Row) {
       db.subscription.cancel_at_period_end = true;
       save(db);
       return json({ cancel_at_period_end: true });
+    case 'coach-comment': {
+      const comment = {
+        id: crypto.randomUUID(),
+        meal_id: body.meal_id,
+        author_id: USER_ID,
+        body: body.body ?? null,
+        reaction: body.reaction ?? null,
+        read_at: null,
+        created_at: new Date().toISOString(),
+      };
+      (db.comments ??= []).push(comment);
+      save(db);
+      return json({ comment });
+    }
     case 'delete-account':
       save(empty());
       return json({ deleted: true });

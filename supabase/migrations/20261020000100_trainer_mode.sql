@@ -45,7 +45,9 @@ begin
   if char_length(trim(coalesce(display_name, ''))) not between 2 and 60 then
     raise exception 'name must be 2-60 characters' using errcode = '22023';
   end if;
-  update public.profiles set role = 'coach', name = trim(display_name) where id = auth.uid();
+  -- Coaches skip the personal onboarding (they can fill in their own targets later from Me).
+  update public.profiles set role = 'coach', name = trim(display_name), onboarded_at = coalesce(onboarded_at, now())
+  where id = auth.uid();
 end $$;
 revoke execute on function public.become_coach(text) from public, anon;
 grant execute on function public.become_coach(text) to authenticated;

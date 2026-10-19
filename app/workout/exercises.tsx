@@ -19,6 +19,7 @@ import { useCreateExercise, useExerciseInstructions, useExercises, type Exercise
 import { MUSCLES, searchExercises, titleCase } from '@/features/workouts/format';
 import { exerciseImageUrl } from '@/features/workouts/images';
 import { useLiveWorkout } from '@/features/workouts/session';
+import { usePlanDraft } from '@/features/coach/planDraft';
 import { t, useLocale } from '@/lib/i18n';
 import { Equipment } from '@/types/preferences';
 
@@ -30,7 +31,8 @@ export default function Exercises() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { mode } = useLocalSearchParams<{ mode?: string }>();
-  const adding = mode === 'add';
+  // add = into the live workout; plan = into the coach's plan draft.
+  const adding = mode === 'add' || mode === 'plan';
   const prefs = usePreferences();
   const { data, isLoading } = useExercises();
   const [q, setQ] = useState('');
@@ -51,6 +53,11 @@ export default function Exercises() {
 
   const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
   const add = (ids: string[]) => {
+    if (mode === 'plan') {
+      usePlanDraft.getState().add(ids);
+      router.back();
+      return;
+    }
     useLiveWorkout.getState().addExercises(
       ids.map((exercise_id) => ({ exercise_id })),
       prefs.default_rest_s,

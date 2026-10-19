@@ -9,7 +9,8 @@ import { supabase } from '@/lib/supabase';
 
 export type Subscription = {
   provider: 'razorpay' | 'dodo' | 'play' | 'appstore';
-  plan: 'monthly' | 'yearly';
+  plan: 'monthly' | 'yearly' | 'coach';
+  quantity?: number;
   status: 'created' | 'active' | 'halted' | 'cancelled' | 'expired';
   current_period_end: string | null;
   cancel_at_period_end: boolean;
@@ -39,7 +40,24 @@ export function useEntitlement() {
       return (data as Subscription | null) ?? null;
     },
   });
-  return { isPro: isActive(query.data), subscription: query.data ?? null, loading: query.isPending };
+  // Clients of a paying trainer are Pro too (public.is_pro); only ask when the user has no Pro of their own.
+  const own = isActive(query.data);
+  const sponsored = useQuery({
+    queryKey: ['subscription', uid, 'sponsored'],
+    enabled: !!uid && !query.isPending && !own,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('my_pro_status');
+      if (error) throw error;
+      const row = ((data as { pro: boolean; sponsored_by: string | null }[] | null) ?? [])[0];
+      return row?.pro && row.sponsored_by ? row.sponsored_by : null;
+    },
+  });
+  return {
+    isPro: own || !!sponsored.data,
+    sponsoredBy: own ? null : (sponsored.data ?? null),
+    subscription: query.data ?? null,
+    loading: query.isPending,
+  };
 }
 
 /**
