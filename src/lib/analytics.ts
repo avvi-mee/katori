@@ -14,7 +14,11 @@ export type AnalyticsEvent =
       name: 'paywall_viewed' | 'checkout_started' | 'subscribed';
       props: { plan?: string; price?: number; source_screen: string };
     }
-  | { name: 'pwa_installed'; props: { platform: string } };
+  | { name: 'pwa_installed'; props: { platform: string } }
+  | { name: 'workout_started'; props: { from_template: boolean } }
+  | { name: 'workout_finished'; props: { sets: number; duration_s: number; prs?: number } }
+  | { name: 'habit_logged'; props: { kind: string } }
+  | { name: 'run_logged'; props: { kind: string; distance_m: number } };
 
 let ph: PostHog | null = null;
 let started = false;

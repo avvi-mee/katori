@@ -1,5 +1,5 @@
 import type { Tabs } from 'expo-router';
-import { CircleUser, Sun, TrendingUp, UtensilsCrossed } from '@/components/icons';
+import { CircleUser, Dumbbell, Sun, TrendingUp, UtensilsCrossed } from '@/components/icons';
 import type React from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +15,7 @@ type BottomTabBarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs
 const TABS: Record<string, { label: MessageKey; Icon: typeof Sun }> = {
   index: { label: 'tabs.today', Icon: Sun },
   food: { label: 'tabs.food', Icon: UtensilsCrossed },
+  train: { label: 'tabs.train', Icon: Dumbbell },
   progress: { label: 'tabs.progress', Icon: TrendingUp },
   me: { label: 'tabs.me', Icon: CircleUser },
 };
