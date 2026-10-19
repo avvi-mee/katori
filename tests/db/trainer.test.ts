@@ -245,7 +245,7 @@ describe('trainer billing and sponsored Pro', () => {
     expect(await isPro(C)).toBe(true);
     expect(await isPro(B)).toBe(false); // B left C
     const status = await asUser(db, A, async (tx) => (await tx.query('select * from public.my_pro_status()')).rows[0]);
-    expect(status).toEqual({ pro: true, sponsored_by: 'Coach Vikram' });
+    expect(status).toEqual({ pro: true, sponsored_by: 'Coach Vikram', free_until: null });
     const coach = await asUser(db, A, async (tx) => (await tx.query('select coach_name from public.my_coach()')).rows);
     expect(coach).toEqual([{ coach_name: 'Coach Vikram' }]);
   });
