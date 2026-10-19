@@ -350,7 +350,7 @@ function demoBoard(db: Db, cid: string) {
   }
   const friends = [
     ['Riya', 0.85],
-    ['Arjun', 0.6],
+    ['Kabir', 0.6],
     ['Sana', 0.35],
   ] as const;
   return [
