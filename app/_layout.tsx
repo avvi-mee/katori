@@ -116,6 +116,9 @@ function Shell() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="scan" options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="workout" options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="activity" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="habits" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="body" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="paywall" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           </Stack.Protected>
           <Stack.Screen name="dev/components" />

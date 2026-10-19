@@ -4,10 +4,17 @@ import Svg, { Line, Rect, Text as SvgText } from 'react-native-svg';
 import { fonts } from '@/design/tokens';
 import { useTheme } from '@/design/theme';
 
-type Props = { days: { label: string; value: number }[]; target: number; height?: number; accessibilityLabel: string };
+type Props = {
+  days: { label: string; value: number }[];
+  target: number;
+  height?: number;
+  accessibilityLabel: string;
+  /** false for goals where more is better (steps, water). */
+  overIsBad?: boolean;
+};
 
 /** Daily kcal bars with a dashed target line. Over-target days use the fat (warning) color. */
-export function WeekBars({ days, target, height = 160, accessibilityLabel }: Props) {
+export function WeekBars({ days, target, height = 160, accessibilityLabel, overIsBad = true }: Props) {
   const { colors } = useTheme();
   const width = 320;
   const max = Math.max(target * 1.25, ...days.map((d) => d.value), 1);
@@ -29,7 +36,7 @@ export function WeekBars({ days, target, height = 160, accessibilityLabel }: Pro
               width={barW}
               height={h}
               rx={8}
-              fill={d.value > target * 1.1 ? colors.fat : colors.accent}
+              fill={overIsBad && d.value > target * 1.1 ? colors.fat : colors.accent}
               opacity={i === days.length - 1 ? 1 : 0.75}
             />
           );
