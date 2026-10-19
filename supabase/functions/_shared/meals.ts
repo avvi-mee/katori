@@ -160,7 +160,7 @@ export async function createDraft(
     ctx: PortionContext;
     mealType: MealType;
     source?: MealSource;
-    inputMode: 'photo' | 'text';
+    inputMode: 'photo' | 'text' | 'telegram';
     photoPath?: string;
     meta?: AiResult;
   },

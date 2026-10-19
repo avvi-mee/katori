@@ -438,3 +438,7 @@ verify_jwt = false
 # Called by Razorpay / Dodo; verifies the provider signature itself.
 [functions.payments-webhook]
 verify_jwt = false
+
+# Called by Telegram; checks the secret_token header itself.
+[functions.telegram-webhook]
+verify_jwt = false
