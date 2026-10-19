@@ -1,4 +1,4 @@
-// Production web build: Metro export with tree shaking, then the Workbox service worker.
+// Production web build: Metro export with tree shaking, the static SEO pages, then the Workbox service worker.
 // (Env is set here so it works the same on Windows and in CI.)
 import { spawnSync } from 'node:child_process';
 
@@ -8,4 +8,5 @@ const run = (cmd, args) => {
   if (r.status !== 0) process.exit(r.status ?? 1);
 };
 run('npx', ['expo', 'export', '--platform', 'web', ...process.argv.slice(2)]);
+run('node', ['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON', 'scripts/build-seo.mjs']);
 run('node', ['scripts/build-sw.mjs']);
