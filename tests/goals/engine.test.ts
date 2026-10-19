@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   dailyScore,
   dailyTargets,
+  engineMayAdjust,
+  isRecalcDay,
   kcalAdherence,
   trainingWeekdays,
   weeklyRecalc,
@@ -97,7 +99,8 @@ describe('dailyScore', () => {
 });
 
 describe('weekly recalculation', () => {
-  const days = (n: number, kcal: number) => Array.from({ length: n }, (_, k) => ({ date: addDays('2026-10-01', k), kcal }));
+  const days = (n: number, kcal: number) =>
+    Array.from({ length: n }, (_, k) => ({ date: addDays('2026-10-01', k), kcal }));
   const trend = (n: number, start: number, perDay: number) =>
     Array.from({ length: n }, (_, k) => ({ date: addDays('2026-10-01', k), weight_kg: start + perDay * k }));
 
@@ -114,20 +117,51 @@ describe('weekly recalculation', () => {
 
   it('lowers the target when fat loss stalls, capped at 10 %', () => {
     // Weight flat on 2,200 → TDEE 2,200; −0.5 %/wk of 80 kg ≈ −440 kcal/day → ideal 1,760; cap → 1,980.
-    const r = weeklyRecalc({ goal: 'fat_loss', currentKcal: 2200, floor: 1500, intake: days(14, 2200), weights: trend(14, 80, 0) });
+    const r = weeklyRecalc({
+      goal: 'fat_loss',
+      currentKcal: 2200,
+      floor: 1500,
+      intake: days(14, 2200),
+      weights: trend(14, 80, 0),
+    });
     expect(r?.kcal).toBe(1980);
     expect(r?.estimatedTdee).toBe(2200);
     expect(r?.reason).toContain('+0.00 kg/week');
   });
 
   it('never goes below the floor', () => {
-    const r = weeklyRecalc({ goal: 'fat_loss', currentKcal: 1600, floor: 1550, intake: days(14, 1600), weights: trend(14, 80, 0.05) });
+    const r = weeklyRecalc({
+      goal: 'fat_loss',
+      currentKcal: 1600,
+      floor: 1550,
+      intake: days(14, 1600),
+      weights: trend(14, 80, 0.05),
+    });
     expect(r?.kcal).toBe(1550);
   });
 
   it('leaves small changes alone', () => {
     // Losing 0.4 kg/week on 2,000 → TDEE 2,440; ideal 2,440 − 440 = 2,000 → no change.
-    const r = weeklyRecalc({ goal: 'fat_loss', currentKcal: 2000, floor: 1500, intake: days(14, 2000), weights: trend(14, 80, -0.4 / 7) });
+    const r = weeklyRecalc({
+      goal: 'fat_loss',
+      currentKcal: 2000,
+      floor: 1500,
+      intake: days(14, 2000),
+      weights: trend(14, 80, -0.4 / 7),
+    });
     expect(r).toBeNull();
+  });
+});
+
+describe('recalculation guards', () => {
+  it('respects a calorie target the user set', () => {
+    expect(engineMayAdjust(null)).toBe(true);
+    expect(engineMayAdjust({ kcal: null, updated_by: 'user' })).toBe(true);
+    expect(engineMayAdjust({ kcal: 1900, updated_by: 'engine' })).toBe(true);
+    expect(engineMayAdjust({ kcal: 1900, updated_by: 'user' })).toBe(false);
+  });
+  it('runs on Mondays', () => {
+    expect(isRecalcDay('2026-10-19')).toBe(true);
+    expect(isRecalcDay('2026-10-20')).toBe(false);
   });
 });

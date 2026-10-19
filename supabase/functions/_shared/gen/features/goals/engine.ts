@@ -220,3 +220,10 @@ export function weeklyRecalc(o: {
     reason: `Weight trend ${trend >= 0 ? '+' : ''}${trend.toFixed(2)} kg/week on ~${Math.round(avgIntake)} kcal/day`,
   };
 }
+
+/** The engine never overwrites a calorie target the user typed in themselves. */
+export const engineMayAdjust = (goals: { kcal?: number | null; updated_by?: string } | null) =>
+  !(goals?.kcal != null && goals.updated_by === 'user');
+
+/** Mondays (IST) are recalculation days. */
+export const isRecalcDay = (istDayStr: string) => new Date(`${istDayStr}T00:00:00Z`).getUTCDay() === 1;

@@ -1,12 +1,14 @@
 // daily-digest: pg_cron calls this at 9 pm IST. For every onboarded user: evening summary + tomorrow's
 // one fix in their coach's voice, saved in-app and sent as web push (unless nudges are muted).
-// Also the nightly cleanup: photos after 30 days, stale drafts, old usage counters.
+// Also the nightly cleanup (photos after 30 days, stale drafts, old usage counters) and, on Mondays, the
+// weekly adaptive calorie recalculation.
 import { personaMeta } from '../_shared/gen/features/personas/personas.ts';
 import { addDays, istDay, istDayRange } from '../_shared/gen/lib/day.ts';
 import { COACH_PROFILE_COLUMNS, writeCoach, type CoachProfileRow } from '../_shared/coach.ts';
 import { buildFacts, groupByDay } from '../_shared/gen/features/personas/facts.ts';
 import { adminClient, fail, json, serve, type Admin } from '../_shared/http.ts';
 import { sendPush } from '../_shared/push.ts';
+import { weeklyRecalcAll } from '../_shared/recalc.ts';
 
 const PAGE = 200;
 const PHOTO_DAYS = 30;
@@ -80,8 +82,13 @@ serve(async (req) => {
     }
   }
 
+  // Before the digest would be ideal, but a failed recalc must never block anyone's evening message.
+  const recalc = await weeklyRecalcAll(admin, now).catch((e) => {
+    console.error('weekly recalc failed', e);
+    return { recalculated: 0 };
+  });
   const cleaned = await cleanup(admin, now);
-  return json({ day, users, pushed, ...cleaned });
+  return json({ day, users, pushed, ...recalc, ...cleaned });
 });
 
 /** Photos are auto-deleted after 30 days; unconfirmed drafts after 7; usage counters after 90. */
