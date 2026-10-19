@@ -5,8 +5,13 @@ import { generateSW } from 'workbox-build';
 const { count, size, warnings } = await generateSW({
   globDirectory: 'dist',
   globPatterns: ['**/*.{js,css,html,ttf,otf,woff,woff2,ico,png,svg,json}'],
-  // Splash screens are only used by iOS at launch; don't precache ~100 KB of them.
-  globIgnores: ['splash/**', 'sw-push.js'],
+  // Splash screens are only used by iOS at launch; don't precache ~100 KB of them. The demo backend chunk
+  // (~1 MB of seed data) is only ever loaded with EXPO_PUBLIC_DEMO=1.
+  globIgnores: [
+    'splash/**',
+    'sw-push.js',
+    ...(process.env.EXPO_PUBLIC_DEMO === '1' ? [] : ['_expo/static/js/web/backend-*.js']),
+  ],
   swDest: 'dist/sw.js',
   importScripts: ['/sw-push.js'],
   navigateFallback: '/index.html',
