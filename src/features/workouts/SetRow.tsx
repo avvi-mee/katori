@@ -53,6 +53,9 @@ function NumCell({
       style={[
         {
           flex: 1,
+          flexBasis: 0,
+          minWidth: 0,
+          width: 0, // web inputs have an intrinsic width; let the row decide
           minHeight: 44,
           borderRadius: 12,
           textAlign: 'center',

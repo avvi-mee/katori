@@ -13,6 +13,7 @@ import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
 import { toast } from '@/components/Toast';
 import { useTheme } from '@/design/theme';
+import { useProfile } from '@/features/auth/profile';
 import { useGoalsRow, usePreferences, useSaveGoals, useSavePreferences, useTargets } from '@/features/goals/api';
 import type { Goal } from '@/features/goals/targets';
 import { TrainingSetup, type TrainingPrefs } from '@/features/goals/TrainingSetup';
@@ -45,6 +46,7 @@ export default function Goals() {
   useLocale();
   const { colors } = useTheme();
   const { data: goals } = useGoalsRow();
+  const { data: profile } = useProfile();
   const targets = useTargets();
   const prefs = usePreferences();
   const saveGoals = useSaveGoals();
@@ -53,7 +55,8 @@ export default function Goals() {
   const [draft, setDraft] = useState<Partial<Record<FieldKey, string>>>({});
   const [training, setTraining] = useState<TrainingPrefs | null>(null);
   const [busy, setBusy] = useState(false);
-  useEffect(() => setPrimary(goals?.primary_goal ?? null), [goals?.primary_goal]);
+  const savedPrimary = goals?.primary_goal ?? profile?.goal ?? null;
+  useEffect(() => setPrimary(savedPrimary), [savedPrimary]);
 
   const invalid = FIELDS.some(({ key }) => {
     const v = draft[key];
@@ -151,7 +154,7 @@ export default function Goals() {
       <Button
         label={t('common.save')}
         loading={busy}
-        disabled={invalid || (!Object.keys(draft).length && !training && primary === (goals?.primary_goal ?? null))}
+        disabled={invalid || (!Object.keys(draft).length && !training && primary === savedPrimary)}
         onPress={save}
       />
 

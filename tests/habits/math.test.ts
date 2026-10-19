@@ -32,15 +32,16 @@ describe('smoking', () => {
   });
 
   it('counts cigarettes avoided against the baseline, never negative per day', () => {
-    // 10 days × 10 baseline = 100; day 5 smoked 4 (−4), day 6 smoked 15 (−10 capped).
+    // 9 completed days × 10 baseline = 90; day 5 smoked 4 (−4), day 6 smoked 15 (−10 capped). Today isn't over yet.
     const logs = [at('2026-10-05', 4), at('2026-10-06', 15)];
-    expect(cigarettesAvoided(logs, 10, SINCE, TODAY)).toBe(86);
+    expect(cigarettesAvoided(logs, 10, SINCE, TODAY)).toBe(76);
+    expect(cigarettesAvoided([], 10, SINCE, '2026-10-01')).toBe(0);
     expect(cigarettesAvoided(logs, 0, SINCE, TODAY)).toBe(0);
   });
 
   it('turns avoided cigarettes into rupees', () => {
-    expect(moneySaved(86, 18)).toBe(1548);
-    expect(moneySaved(86, null)).toBe(0);
+    expect(moneySaved(76, 18)).toBe(1368);
+    expect(moneySaved(76, null)).toBe(0);
   });
 });
 

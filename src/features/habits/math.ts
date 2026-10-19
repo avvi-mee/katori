@@ -32,7 +32,7 @@ export function smokeFreeDays(logs: HabitLog[], trackingSince: string, today: st
   return Math.max(0, daysBetween(start, today));
 }
 
-/** Cigarettes not smoked since tracking started: Σ max(0, baseline − smoked) over completed days (today included). */
+/** Cigarettes not smoked since tracking started: Σ max(0, baseline − smoked) over completed days (today counts tomorrow). */
 export function cigarettesAvoided(
   logs: HabitLog[],
   baselinePerDay: number,
@@ -42,7 +42,7 @@ export function cigarettesAvoided(
   if (!baselinePerDay) return 0;
   const days = perDay(logs);
   let avoided = 0;
-  for (let d = istDay(new Date(trackingSince)); d <= today; d = addDays(d, 1)) {
+  for (let d = istDay(new Date(trackingSince)); d < today; d = addDays(d, 1)) {
     avoided += Math.max(0, baselinePerDay - (days.get(d) ?? 0));
   }
   return Math.round(avoided);
