@@ -18,6 +18,7 @@ import { kcalText } from '@/features/meals/format';
 import { lastNDays, proteinStreak, weekSummary } from '@/features/meals/streaks';
 import { weeklyLine } from '@/features/personas/templates';
 import { shareCard } from '@/features/share/shareCard';
+import { HabitStreaksCard, StrengthCard, VolumeCard, WeightCard } from '@/features/workouts/ProgressCards';
 import { istDay } from '@/lib/day';
 import { t, useLocale } from '@/lib/i18n';
 
@@ -89,6 +90,11 @@ export default function Progress() {
         )}
         <StreakDots days={week.proteinDays} label={t('report.proteinDays')} />
       </Card>
+
+      <WeightCard />
+      <StrengthCard />
+      <VolumeCard />
+      <HabitStreaksCard />
 
       <Text variant="caption" className="mt-2 font-sans-bold uppercase tracking-widest">
         {t('progress.reportTitle')}

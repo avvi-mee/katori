@@ -22,7 +22,7 @@ export default function DietStep() {
         disabled: !diet,
         onPress: () => {
           track('onboarding_step', { step: 'diet', diet_type: diet });
-          router.push('/katori-calibration');
+          router.push('/training');
         },
       }}
     >

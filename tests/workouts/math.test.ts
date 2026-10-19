@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   bestE1rm,
   detectPrs,
+  e1rmSeries,
   deloadHint,
   e1rm,
   formatDuration,
@@ -13,6 +14,7 @@ import {
   progressionHint,
   runKcal,
   volume,
+  volumePerMuscle,
   workoutKcal,
   type LoggedSet,
 } from '@/features/workouts/math';
@@ -28,7 +30,12 @@ describe('e1rm / volume', () => {
   });
 
   it('ignores warm-ups and empty sets in volume and best e1RM', () => {
-    const sets: LoggedSet[] = [{ kind: 'warmup', kg: 20, reps: 10 }, w(60, 8), w(60, 8), { kind: 'working', kg: null, reps: 8 }];
+    const sets: LoggedSet[] = [
+      { kind: 'warmup', kg: 20, reps: 10 },
+      w(60, 8),
+      w(60, 8),
+      { kind: 'working', kg: null, reps: 8 },
+    ];
     expect(volume(sets)).toBe(960);
     expect(bestE1rm(sets)).toBeCloseTo(76, 0);
     expect(bestE1rm([])).toBe(0);
@@ -130,5 +137,32 @@ describe('detectPrs (mirrors the database trigger)', () => {
 
   it('ignores warm-ups', () => {
     expect(detectPrs([h('w1', 60, 8)], [h('w2', 200, 1, 'warmup')])).toEqual([]);
+  });
+});
+
+describe('progress series', () => {
+  const s = (exercise_id: string, kg: number, reps: number, kind: LoggedSet['kind'] = 'working') => ({
+    exercise_id,
+    kind,
+    kg,
+    reps,
+  });
+  const workouts = [
+    { started_at: '2026-10-08T10:00:00Z', sets: [s('bench', 62.5, 8), s('squat', 100, 5)] },
+    { started_at: '2026-10-01T10:00:00Z', sets: [s('bench', 60, 8), s('bench', 20, 10, 'warmup')] },
+  ];
+  it('gives best e1RM per session, oldest first', () => {
+    expect(e1rmSeries(workouts, 'bench')).toEqual([
+      { date: '2026-10-01T10:00:00Z', value: 76 },
+      { date: '2026-10-08T10:00:00Z', value: 79.2 },
+    ]);
+  });
+  it('counts working sets and volume per muscle in the window', () => {
+    const muscles = (id: string) => (id === 'bench' ? ['chest', 'triceps'] : ['quadriceps']);
+    expect(volumePerMuscle(workouts, muscles, '2026-10-05T00:00:00Z')).toEqual([
+      { muscle: 'chest', sets: 1, volume: 500 },
+      { muscle: 'triceps', sets: 1, volume: 500 },
+      { muscle: 'quadriceps', sets: 1, volume: 500 },
+    ]);
   });
 });

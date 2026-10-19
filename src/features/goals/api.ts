@@ -3,10 +3,11 @@ import { useMemo } from 'react';
 
 import { useProfile, useUpdateProfile } from '@/features/auth/profile';
 import { useSession } from '@/features/auth/session';
-import { stepsOn, useActivityDays } from '@/features/activity/api';
+import { stepsOn, useActivityDays, useRuns } from '@/features/activity/api';
 import { useHabitsToday } from '@/features/habits/api';
 import { useDayMeals } from '@/features/meals/api';
 import { useWorkoutsOn } from '@/features/workouts/api';
+import { runKcal } from '@/features/workouts/math';
 import { istDay } from '@/lib/day';
 import { upsertRows, useTable, type Row } from '@/lib/localRows';
 import { parsePreferences, type Preferences } from '@/types/preferences';
@@ -47,24 +48,37 @@ export function useSavePreferences() {
     update.mutateAsync({ preferences: { ...parsePreferences(data?.preferences), ...patch } });
 }
 
-/** Today's targets from the goals row, the profile and preferences. */
+/** Today's targets from the goals row, the profile and preferences (plus today's burn, if opted in). */
 export function useTargets() {
   const { data: profile } = useProfile();
   const { data: goals } = useGoalsRow();
   const prefs = usePreferences();
-  return useMemo(
-    () =>
-      dailyTargets(
-        {
-          kcal_target: profile?.kcal_target ?? null,
-          protein_target: profile?.protein_target ?? null,
-          weight_kg: profile?.weight_kg ?? null,
-        },
-        goals,
-        prefs.training_days,
-      ),
-    [profile, goals, prefs.training_days],
-  );
+  const today = istDay();
+  const workouts = useWorkoutsOn(today);
+  const { data: runs } = useRuns();
+  return useMemo(() => {
+    const base = dailyTargets(
+      {
+        kcal_target: profile?.kcal_target ?? null,
+        protein_target: profile?.protein_target ?? null,
+        weight_kg: profile?.weight_kg ?? null,
+      },
+      goals,
+      prefs.training_days,
+    );
+    if (!prefs.add_burn_to_targets) return base;
+    // Midpoint of each estimated range; off by default because burn estimates run high.
+    const kg = profile?.weight_kg ?? 70;
+    const burn =
+      workouts.reduce((a, w) => a + ((w.kcal_low ?? 0) + (w.kcal_high ?? 0)) / 2, 0) +
+      (runs ?? [])
+        .filter((r) => istDay(new Date(r.started_at)) === today)
+        .reduce((a, r) => {
+          const k = runKcal(r.kind, r.distance_m, kg);
+          return a + (k.low + k.high) / 2;
+        }, 0);
+    return { ...base, kcal: Math.round(base.kcal + burn) };
+  }, [profile, goals, prefs.training_days, prefs.add_burn_to_targets, workouts, runs, today]);
 }
 
 /** Is `day` one of the user's training days? */

@@ -72,7 +72,7 @@ export default function Habits() {
           return (
             <Card key={h.id} className="flex-row items-center gap-3" enterIndex={i}>
               <PressableScale
-                onPress={() => router.push({ pathname: '/habits/[id]', params: { id: h.id } })}
+                onPress={() => router.push({ pathname: '/habit/[id]', params: { id: h.id } })}
                 accessibilityLabel={t('habits.open', { name: h.name })}
                 className="flex-1 flex-row items-center gap-3"
               >

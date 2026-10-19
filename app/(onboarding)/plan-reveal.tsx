@@ -15,6 +15,7 @@ import { useUpdateProfile } from '@/features/auth/profile';
 import { computeTargets } from '@/features/goals/targets';
 import { track } from '@/lib/analytics';
 import { t, useLocale } from '@/lib/i18n';
+import { parsePreferences } from '@/types/preferences';
 
 export default function PlanReveal() {
   useLocale();
@@ -66,6 +67,7 @@ export default function PlanReveal() {
         savage_mode: a.savage_mode,
         adult_confirmed: a.adult_confirmed,
         locale: a.locale,
+        preferences: { ...parsePreferences({}), ...a.training },
         kcal_target: targets.kcal,
         protein_target: targets.protein,
         kcal_floor: targets.floor,

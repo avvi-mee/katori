@@ -73,6 +73,13 @@ describe('finishRows', () => {
       ['bench', 1, 60, 8],
       ['bench', 2, 60, 8],
     ]);
-    expect(r.workout).toMatchObject({ user_id: 'u1', template_id: 't1', duration_s: 3600, volume_kg: 960, kcal_low: 245, kcal_high: 420 });
+    expect(r.workout).toMatchObject({
+      user_id: 'u1',
+      template_id: 't1',
+      duration_s: 3600,
+      volume_kg: 960,
+      kcal_low: 245,
+      kcal_high: 420,
+    });
   });
 });

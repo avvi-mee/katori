@@ -5,11 +5,9 @@ import { View } from 'react-native';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { CoachBubble } from '@/components/CoachBubble';
-import { CountUp } from '@/components/CountUp';
 import { EmptyState } from '@/components/EmptyState';
 import { MacroBar } from '@/components/MacroBar';
 import { RangeBadge } from '@/components/RangeBadge';
-import { Ring } from '@/components/Ring';
 import { Screen } from '@/components/Screen';
 import { Skeleton } from '@/components/Skeleton';
 import { SwipeRow } from '@/components/SwipeRow';
@@ -17,6 +15,8 @@ import { Text } from '@/components/Text';
 import { toast } from '@/components/Toast';
 import { useTheme } from '@/design/theme';
 import { useProfile } from '@/features/auth/profile';
+import { usePreferences, useTargets } from '@/features/goals/api';
+import { HabitChips, ScoreCard, WorkoutCard } from '@/features/goals/TodayCards';
 import { useDayMeals, useDeleteMeal, useTodayCoach } from '@/features/meals/api';
 import { formatAmount, kcalText } from '@/features/meals/format';
 import { buildCoachMessage } from '@/features/personas/coach';
@@ -34,6 +34,8 @@ export default function Today() {
   const { colors } = useTheme();
   const today = istDay();
   const { data: profile } = useProfile();
+  const prefs = usePreferences();
+  const targets = useTargets();
   const meals = useDayMeals(today);
   const coach = useTodayCoach(today);
   const del = useDeleteMeal();
@@ -48,8 +50,8 @@ export default function Today() {
 
   const visible = (meals.data ?? []).filter((m) => !pending.has(m.id));
   const day = totals(visible);
-  const target = profile?.kcal_target ?? 2000;
-  const proteinTarget = profile?.protein_target ?? 100;
+  const target = targets.kcal;
+  const proteinTarget = targets.protein_g;
   const left = target - day.kcal;
 
   const unpend = (id: string) =>
@@ -112,30 +114,17 @@ export default function Today() {
         </Text>
       </View>
 
-      <Card className="items-center gap-3 py-6">
-        {meals.isPending ? (
-          <Skeleton width={220} height={220} radius={110} />
-        ) : (
-          <Ring
-            progress={day.kcal / target}
-            size={220}
-            stroke={18}
-            color={left < -target * 0.1 ? colors.fat : colors.accent}
-            accessibilityLabel={`${Math.round(day.kcal)} of ${target} kcal`}
-          >
-            <CountUp variant="hero" value={day.kcal} />
-            <Text variant="caption">of {kcalText(target)} kcal</Text>
-          </Ring>
-        )}
+      {meals.isPending ? <Skeleton height={260} radius={20} /> : <ScoreCard kcal={day.kcal} protein={day.protein_g} />}
+      <HabitChips />
+      {prefs.modules.includes('train') ? <WorkoutCard /> : null}
+
+      <Card className="gap-3">
         <View className="flex-row items-center gap-2">
           {day.kcal > 0 ? <RangeBadge low={day.kcal_low} high={day.kcal_high} /> : null}
-          <Text variant="label">
+          <Text variant="label" style={{ color: left < -target * 0.1 ? colors.fat : undefined }}>
             {left >= 0 ? t('today.left', { kcal: kcalText(left) }) : t('today.over', { kcal: kcalText(-left) })}
           </Text>
         </View>
-      </Card>
-
-      <Card className="gap-3">
         <MacroBar
           label={t('macro.protein')}
           value={day.protein_g}

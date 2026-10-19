@@ -33,6 +33,8 @@ describe('searchExercises', () => {
   });
   it('filters by muscle and equipment', () => {
     expect(searchExercises(list, '', { muscle: 'lats' })).toHaveLength(1);
-    expect(searchExercises(list, 'press', { equipment: 'dumbbell' }).map((e) => e.name)).toEqual(['Incline Dumbbell Press']);
+    expect(searchExercises(list, 'press', { equipment: 'dumbbell' }).map((e) => e.name)).toEqual([
+      'Incline Dumbbell Press',
+    ]);
   });
 });

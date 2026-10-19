@@ -6,14 +6,16 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChipRow } from '@/components/ChipRow';
 import { CoachBubble } from '@/components/CoachBubble';
+import { ChevronRight } from '@/components/icons';
 import { OptionCard } from '@/components/OptionCard';
+import { PressableScale } from '@/components/PressableScale';
 import { Screen } from '@/components/Screen';
 import { Sheet } from '@/components/Sheet';
 import { Skeleton } from '@/components/Skeleton';
 import { Switch } from '@/components/Switch';
 import { Text } from '@/components/Text';
 import { toast } from '@/components/Toast';
-import { useThemePref } from '@/design/theme';
+import { useTheme, useThemePref } from '@/design/theme';
 import { useProfile, useUpdateProfile, type ProfileUpdate } from '@/features/auth/profile';
 import { useEntitlement } from '@/features/billing/entitlement';
 import { signOut, useSession } from '@/features/auth/session';
@@ -43,6 +45,7 @@ export default function Me() {
   const { data: profile } = useProfile();
   const update = useUpdateProfile();
   const { pref, setPref } = useThemePref();
+  const { colors } = useTheme();
   const [picking, setPicking] = useState(false);
   const [confirm, setConfirm] = useState<'cancel' | 'delete' | null>(null);
   const [busy, setBusy] = useState(false);
@@ -157,6 +160,28 @@ export default function Me() {
           </View>
         </View>
         <Text variant="caption">{t('me.floor', { kcal: kcalText(profile.kcal_floor ?? 1200) })}</Text>
+      </Section>
+
+      <Section title={t('me.goalsSection')}>
+        {(
+          [
+            { label: t('me.goals'), href: '/goals' },
+            { label: t('me.body'), href: '/body' },
+            { label: t('me.habits'), href: '/habits' },
+            { label: t('me.activity'), href: '/activity' },
+          ] as const
+        ).map((l) => (
+          <PressableScale
+            key={l.href}
+            onPress={() => router.push(l.href)}
+            accessibilityRole="link"
+            accessibilityLabel={l.label}
+            className="min-h-touch flex-row items-center justify-between"
+          >
+            <Text variant="label">{l.label}</Text>
+            <ChevronRight color={colors.inkMuted} size={20} />
+          </PressableScale>
+        ))}
       </Section>
 
       <Section title={t('me.calibration')}>

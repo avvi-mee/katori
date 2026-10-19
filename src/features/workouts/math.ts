@@ -141,3 +141,33 @@ export function detectPrs(history: HistorySet[], session: HistorySet[]): PrHit[]
   }
   return [...best.values()];
 }
+
+type SessionLike = { started_at: string; sets: (LoggedSet & { exercise_id: string })[] };
+
+/** Best e1RM per session for one lift, oldest first (the Progress strength chart). */
+export function e1rmSeries(workouts: SessionLike[], exerciseId: string): { date: string; value: number }[] {
+  return workouts
+    .map((w) => ({ date: w.started_at, value: bestE1rm(w.sets.filter((s) => s.exercise_id === exerciseId)) }))
+    .filter((p) => p.value > 0)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((p) => ({ ...p, value: Math.round(p.value * 10) / 10 }));
+}
+
+/** Working sets and volume per primary muscle for workouts since `fromIso` (Pro analytics). */
+export function volumePerMuscle(
+  workouts: SessionLike[],
+  musclesOf: (exerciseId: string) => string[],
+  fromIso: string,
+): { muscle: string; sets: number; volume: number }[] {
+  const out = new Map<string, { sets: number; volume: number }>();
+  for (const w of workouts) {
+    if (w.started_at < fromIso) continue;
+    for (const s of w.sets.filter(counts)) {
+      for (const m of musclesOf(s.exercise_id)) {
+        const cur = out.get(m) ?? { sets: 0, volume: 0 };
+        out.set(m, { sets: cur.sets + 1, volume: cur.volume + s.kg! * s.reps! });
+      }
+    }
+  }
+  return [...out].map(([muscle, v]) => ({ muscle, ...v })).sort((a, b) => b.sets - a.sets || b.volume - a.volume);
+}

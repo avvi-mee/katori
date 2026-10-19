@@ -4,6 +4,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import type { Activity, Goal, Sex } from '@/features/goals/targets';
 import type { PersonaId } from '@/features/personas/personas';
 import type { Locale } from '@/lib/i18n';
+import type { Preferences } from '@/types/preferences';
 import { idbStorage } from '@/lib/storage';
 
 export type Answers = {
@@ -20,6 +21,7 @@ export type Answers = {
   savage_mode: boolean;
   adult_confirmed: boolean;
   locale: Locale;
+  training: Pick<Preferences, 'training_place' | 'equipment' | 'training_days' | 'training_weekdays'>;
 };
 
 export const ONBOARDING_STEPS = [
@@ -27,6 +29,7 @@ export const ONBOARDING_STEPS = [
   'goal',
   'body',
   'diet',
+  'training',
   'katori-calibration',
   'coach-picker',
   'plan-reveal',
@@ -40,6 +43,7 @@ const initial: Answers = {
   savage_mode: false,
   adult_confirmed: false,
   locale: 'en',
+  training: { training_place: 'gym', equipment: [], training_days: 3, training_weekdays: [] },
 };
 
 /** Onboarding answers survive a refresh mid-flow (IndexedDB). */
