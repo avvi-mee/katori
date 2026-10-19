@@ -53,7 +53,7 @@ const meal = (
 });
 
 /** Asha logs every day and hits protein; Rohan stopped logging two days ago after a protein-short streak. */
-export function seedClients(now = new Date()): CoachDemo {
+export function seedClients(coachId: string, now = new Date()): CoachDemo {
   const today = istDay(now);
   const day = (n: number) => addDays(today, -n);
   const meals: Row[] = [];
@@ -72,38 +72,36 @@ export function seedClients(now = new Date()): CoachDemo {
         14,
       ),
     );
-    if (n > 0 || now.getUTCHours() > 8)
-      meals.push(
-        meal(
-          ASHA,
-          day(n),
-          13.5,
-          'lunch',
-          [
-            ['Dal tadka', 'katori', 1],
-            ['Roti', 'piece', 2],
-            ['Paneer bhurji', 'katori', 1],
-          ],
-          720,
-          38,
-        ),
-      );
-    if (n > 0)
-      meals.push(
-        meal(
-          ASHA,
-          day(n),
-          20.5,
-          'dinner',
-          [
-            ['Rajma', 'katori', 1],
-            ['Rice', 'katori', 1],
-            ['Curd', 'katori', 1],
-          ],
-          640,
-          28,
-        ),
-      );
+    meals.push(
+      meal(
+        ASHA,
+        day(n),
+        13.5,
+        'lunch',
+        [
+          ['Dal tadka', 'katori', 1],
+          ['Roti', 'piece', 2],
+          ['Paneer bhurji', 'katori', 1],
+        ],
+        720,
+        38,
+      ),
+    );
+    meals.push(
+      meal(
+        ASHA,
+        day(n),
+        20.5,
+        'dinner',
+        [
+          ['Rajma', 'katori', 1],
+          ['Rice', 'katori', 1],
+          ['Curd', 'katori', 1],
+        ],
+        640,
+        28,
+      ),
+    );
   }
   for (let n = 2; n < 7; n++) {
     meals.push(
@@ -160,14 +158,14 @@ export function seedClients(now = new Date()): CoachDemo {
     links: [
       {
         id: crypto.randomUUID(),
-        coach_id: DEMO_COACH.id,
+        coach_id: coachId,
         client_id: ASHA,
         status: 'active',
         started_at: istDayRange(day(30)).from,
       },
       {
         id: crypto.randomUUID(),
-        coach_id: DEMO_COACH.id,
+        coach_id: coachId,
         client_id: ROHAN,
         status: 'active',
         started_at: istDayRange(day(12)).from,
@@ -197,7 +195,8 @@ export function seedClients(now = new Date()): CoachDemo {
         weight_kg: 71,
       },
     ],
-    meals,
+    // Today's later meals haven't happened yet.
+    meals: meals.filter((m) => String(m.eaten_at) <= now.toISOString()),
     workouts,
     templates: [
       {
@@ -205,7 +204,7 @@ export function seedClients(now = new Date()): CoachDemo {
         owner_id: ASHA,
         name: 'Push',
         plan_weekdays: [1, 4],
-        assigned_by_coach_id: DEMO_COACH.id,
+        assigned_by_coach_id: coachId,
         template_exercises: [],
       },
       {
@@ -213,7 +212,7 @@ export function seedClients(now = new Date()): CoachDemo {
         owner_id: ROHAN,
         name: 'Full body',
         plan_weekdays: [1, 3, 5],
-        assigned_by_coach_id: DEMO_COACH.id,
+        assigned_by_coach_id: coachId,
         template_exercises: [],
       },
     ],

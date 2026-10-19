@@ -23,6 +23,7 @@ import { kcalText } from '@/features/meals/format';
 import { PERSONAS, personaMeta } from '@/features/personas/personas';
 import { SavageSwitch } from '@/features/personas/SavageSwitch';
 import { MyCoachSection } from '@/features/coach/MyCoachSection';
+import { useGoalsRow, useTargets } from '@/features/goals/api';
 import { disablePush, enablePush, pushEnabled } from '@/features/pwa/pwa';
 import { callFunction, errorText } from '@/lib/api';
 import { isDemo } from '@/lib/demo';
@@ -75,6 +76,8 @@ export default function Me() {
     }
   };
   const { isPro, subscription, sponsoredBy } = useEntitlement();
+  const targets = useTargets();
+  const { data: goalsRow } = useGoalsRow();
   const qc = useQueryClient();
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString('en-IN', {
@@ -152,15 +155,17 @@ export default function Me() {
       <Section title={t('me.targets')}>
         <View className="flex-row justify-between">
           <View>
-            <Text variant="number">{kcalText(profile.kcal_target ?? 0)}</Text>
+            <Text variant="number">{kcalText(targets.kcal)}</Text>
             <Text variant="caption">{t('onb.plan.kcal')}</Text>
           </View>
           <View className="items-end">
-            <Text variant="number">{profile.protein_target ?? 0} g</Text>
+            <Text variant="number">{targets.protein_g} g</Text>
             <Text variant="caption">{t('macro.protein')}</Text>
           </View>
         </View>
         <Text variant="caption">{t('me.floor', { kcal: kcalText(profile.kcal_floor ?? 1200) })}</Text>
+        {goalsRow?.updated_by === 'coach' ? <Text variant="caption">{t('me.targetsByCoach')}</Text> : null}
+        {goalsRow?.updated_by === 'engine' ? <Text variant="caption">{t('goals.engineUpdated')}</Text> : null}
       </Section>
 
       <Section title={t('me.goalsSection')}>

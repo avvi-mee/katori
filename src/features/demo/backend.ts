@@ -229,7 +229,7 @@ function rpc(db: Db, name: string, body: Row | null, headers: Headers) {
           name: String(body?.display_name ?? db.profile.name),
           onboarded_at: db.profile.onboarded_at ?? new Date().toISOString(),
         };
-      db.trainer ??= seedClients();
+      db.trainer ??= seedClients(USER_ID);
       save(db);
       return new Response(null, { status: 204 });
     case 'create_coach_invite':
