@@ -13,8 +13,16 @@ export function providerFromEnv(): BillingProvider {
   return env('PAYMENT_PROVIDER') === 'dodo' ? 'dodo' : 'razorpay';
 }
 
-export const planIds = () => ({ monthly: env('RAZORPAY_PLAN_MONTHLY'), yearly: env('RAZORPAY_PLAN_YEARLY') });
-export const productIds = () => ({ monthly: env('DODO_PRODUCT_MONTHLY'), yearly: env('DODO_PRODUCT_YEARLY') });
+export const planIds = () => ({
+  monthly: env('RAZORPAY_PLAN_MONTHLY'),
+  yearly: env('RAZORPAY_PLAN_YEARLY'),
+  coach: env('RAZORPAY_PLAN_COACH'),
+});
+export const productIds = () => ({
+  monthly: env('DODO_PRODUCT_MONTHLY'),
+  yearly: env('DODO_PRODUCT_YEARLY'),
+  coach: env('DODO_PRODUCT_COACH'),
+});
 
 const dodoBase = () =>
   env('DODO_ENVIRONMENT') === 'live_mode' ? 'https://live.dodopayments.com' : 'https://test.dodopayments.com';
@@ -32,7 +40,7 @@ const razorpayAuth = () => `Basic ${btoa(`${env('RAZORPAY_KEY_ID')}:${env('RAZOR
 
 export async function createCheckout(
   provider: BillingProvider,
-  o: { userId: string; email: string | undefined; plan: Plan; returnUrl: string },
+  o: { userId: string; email: string | undefined; plan: Plan; returnUrl: string; quantity?: number },
 ): Promise<Checkout> {
   if (provider === 'razorpay') {
     const planId = planIds()[o.plan];
@@ -45,7 +53,7 @@ export async function createCheckout(
         body: JSON.stringify({
           plan_id: planId,
           total_count: o.plan === 'yearly' ? 10 : 120,
-          quantity: 1,
+          quantity: o.quantity ?? 1,
           customer_notify: 1,
           notes: { user_id: o.userId, plan: o.plan },
         }),
@@ -63,7 +71,7 @@ export async function createCheckout(
       method: 'POST',
       headers: { Authorization: `Bearer ${env('DODO_API_KEY')}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        product_cart: [{ product_id: productId, quantity: 1 }],
+        product_cart: [{ product_id: productId, quantity: o.quantity ?? 1 }],
         ...(o.email ? { customer: { email: o.email } } : {}),
         return_url: o.returnUrl,
         metadata: { user_id: o.userId, plan: o.plan },
@@ -97,5 +105,37 @@ export async function cancelSubscription(provider: BillingProvider, ref: string,
       body: JSON.stringify(atPeriodEnd ? { cancel_at_next_billing_date: true } : { status: 'cancelled' }),
     },
     'dodo cancel',
+  );
+}
+
+/**
+ * Trainer plan: bill ₹99 × active clients. Razorpay applies the new quantity from the next cycle; Dodo
+ * changes the plan quantity with proration.
+ */
+export async function updateQuantity(provider: BillingProvider, ref: string, quantity: number) {
+  if (provider === 'razorpay') {
+    await call(
+      `https://api.razorpay.com/v1/subscriptions/${encodeURIComponent(ref)}`,
+      {
+        method: 'PATCH',
+        headers: { Authorization: razorpayAuth(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity, schedule_change_at: 'cycle_end' }),
+      },
+      'razorpay update quantity',
+    );
+    return;
+  }
+  await call(
+    `${dodoBase()}/subscriptions/${encodeURIComponent(ref)}/change-plan`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${env('DODO_API_KEY')}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_id: productIds().coach,
+        quantity,
+        proration_billing_mode: 'prorated_immediately',
+      }),
+    },
+    'dodo update quantity',
   );
 }

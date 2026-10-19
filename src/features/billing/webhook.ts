@@ -3,7 +3,8 @@
 
 export type BillingProvider = 'razorpay' | 'dodo';
 export type BillingStatus = 'created' | 'active' | 'halted' | 'cancelled' | 'expired';
-export type Plan = 'monthly' | 'yearly';
+/** 'coach' = the trainer plan: ₹99 per active client per month (quantity = active clients). */
+export type Plan = 'monthly' | 'yearly' | 'coach';
 
 export type BillingEvent = {
   provider: BillingProvider;
@@ -97,13 +98,15 @@ const str = (v: unknown): string | null => (typeof v === 'string' && v ? v : nul
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const userId = (v: unknown) => (typeof v === 'string' && UUID.test(v) ? v : null);
 const planOf = (explicit: unknown, id: string | null, ids: Partial<Record<Plan, string>>): Plan | null =>
-  explicit === 'monthly' || explicit === 'yearly'
+  explicit === 'monthly' || explicit === 'yearly' || explicit === 'coach'
     ? explicit
     : id && id === ids.yearly
       ? 'yearly'
       : id && id === ids.monthly
         ? 'monthly'
-        : null;
+        : id && id === ids.coach
+          ? 'coach'
+          : null;
 
 /** Razorpay subscription.* event → normalised event, or null for events we ignore. */
 export function parseRazorpay(payload: unknown, planIds: Partial<Record<Plan, string>>): BillingEvent | null {

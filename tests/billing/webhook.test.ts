@@ -96,6 +96,11 @@ describe('parseRazorpay', () => {
     },
   });
 
+  it('recognises the trainer plan from notes or plan id', () => {
+    expect(parseRazorpay(event('subscription.charged', { user_id: USER, plan: 'coach' }), {})?.plan).toBe('coach');
+    expect(parseRazorpay(event('subscription.charged', { user_id: USER }), { coach: 'plan_Y' })?.plan).toBe('coach');
+  });
+
   it('maps charged → active with period end, user and plan from notes', () => {
     expect(parseRazorpay(event('subscription.charged'), {})).toEqual({
       provider: 'razorpay',

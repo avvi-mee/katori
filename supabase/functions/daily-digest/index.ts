@@ -9,6 +9,7 @@ import { buildFacts, groupByDay } from '../_shared/gen/features/personas/facts.t
 import { adminClient, fail, json, serve, type Admin } from '../_shared/http.ts';
 import { sendPush } from '../_shared/push.ts';
 import { weeklyRecalcAll } from '../_shared/recalc.ts';
+import { monthlyCoachBilling } from '../_shared/coachBilling.ts';
 
 const PAGE = 200;
 const PHOTO_DAYS = 30;
@@ -37,24 +38,17 @@ serve(async (req) => {
     if (!profiles?.length) break;
     const ids = profiles.map((p) => p.id);
 
-    const [{ data: meals }, { data: subs }] = await Promise.all([
+    const [{ data: meals }, { data: proIds }] = await Promise.all([
       admin
         .from('meals')
         .select('user_id, eaten_at, kcal, protein_g')
         .in('user_id', ids)
         .gte('eaten_at', from)
         .lt('eaten_at', to),
-      admin
-        .from('subscriptions')
-        .select('user_id, status, current_period_end')
-        .in('user_id', ids)
-        .eq('status', 'active'),
+      // Own subscription or a paying trainer (public.is_pro).
+      admin.rpc('pro_user_ids', { ids }),
     ]);
-    const pro = new Set(
-      (subs ?? [])
-        .filter((s) => !s.current_period_end || Date.parse(s.current_period_end) > now.getTime())
-        .map((s) => s.user_id),
-    );
+    const pro = new Set((proIds as string[] | null) ?? []);
     const byUser = new Map<string, { eaten_at: string; kcal: number; protein_g: number }[]>();
     for (const m of meals ?? []) byUser.set(m.user_id, [...(byUser.get(m.user_id) ?? []), m]);
 
@@ -87,8 +81,12 @@ serve(async (req) => {
     console.error('weekly recalc failed', e);
     return { recalculated: 0 };
   });
+  const billing = await monthlyCoachBilling(admin, now).catch((e) => {
+    console.error('coach billing failed', e);
+    return { coaches_billed: 0 };
+  });
   const cleaned = await cleanup(admin, now);
-  return json({ day, users, pushed, ...recalc, ...cleaned });
+  return json({ day, users, pushed, ...recalc, ...billing, ...cleaned });
 });
 
 /** Photos are auto-deleted after 30 days; unconfirmed drafts after 7; usage counters after 90. */
