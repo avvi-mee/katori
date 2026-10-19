@@ -18,7 +18,7 @@ import {
   type Usual,
 } from '@/features/portions/engine';
 import { detectPrs, type HistorySet } from '@/features/workouts/math';
-import { istDay, istDayRange } from '@/lib/day';
+import { addDays, istDay, istDayRange } from '@/lib/day';
 import { applyOp, PRIMARY_KEY, type SyncTable } from '@/lib/outbox';
 import type { DraftItem, MealSource, MealType, Question, Unit } from '@/types/meal';
 
@@ -48,6 +48,8 @@ type Db = {
   trainer?: CoachDemo;
   myCoach?: Row | null;
   comments?: Row[];
+  /** Phase 3: referral code, challenges (with demo friends) and the Telegram link. */
+  reach?: { code: string; challenges: Row[]; telegram: boolean };
 };
 
 const KEY = 'katori-demo-db';
@@ -265,10 +267,102 @@ function rpc(db: Db, name: string, body: Row | null, headers: Headers) {
       save(db);
       return new Response(null, { status: 204 });
     case 'my_pro_status':
-      return json([{ pro: isPro(db), sponsored_by: null }]);
+      return json([{ pro: isPro(db), sponsored_by: null, free_until: null }]);
+    case 'my_referral_code':
+      return json(reachOf(db).code);
+    case 'referral_preview':
+      return json(String(body?.code ?? '').toUpperCase() === 'FRIEND23' ? 'Riya' : null);
+    case 'redeem_referral':
+      return String(body?.code ?? '').toUpperCase() === 'FRIEND23'
+        ? json('Riya')
+        : json({ code: 'P0002', message: 'code not found' }, 400);
+    case 'create_challenge': {
+      const r = reachOf(db);
+      const today = istDay();
+      const id = crypto.randomUUID();
+      r.challenges.push({
+        id,
+        name: String(body?.challenge_name ?? 'Protein month'),
+        starts_on: today,
+        ends_on: addDays(today, 29),
+        invite_code: 'PROTEIN2',
+        me: String(body?.display_name ?? 'Me'),
+      });
+      save(db);
+      return json(id);
+    }
+    case 'challenge_preview':
+      return json([{ name: 'Gym gang protein month', starts_on: istDay(), members: 4 }]);
+    case 'join_challenge': {
+      const r = reachOf(db);
+      const existing = r.challenges.find((c) => c.invite_code === 'GYMGANG2');
+      if (existing) return json(existing.id);
+      const id = crypto.randomUUID();
+      const start = addDays(istDay(), -6);
+      r.challenges.push({
+        id,
+        name: 'Gym gang protein month',
+        starts_on: start,
+        ends_on: addDays(start, 29),
+        invite_code: 'GYMGANG2',
+        me: String(body?.display_name ?? 'Me'),
+      });
+      save(db);
+      return json(id);
+    }
+    case 'leave_challenge': {
+      const r = reachOf(db);
+      r.challenges = r.challenges.filter((c) => c.id !== body?.cid);
+      save(db);
+      return new Response(null, { status: 204 });
+    }
+    case 'challenge_leaderboard':
+      return json(demoBoard(db, String(body?.cid ?? '')));
+    case 'create_channel_link_code':
+      reachOf(db).telegram = true; // demo: pretend the user finished linking in Telegram
+      save(db);
+      return json('TGLINK23');
     default:
       return one(null);
   }
+}
+
+// ─── Phase 3: reach ──────────────────────────────────────────────────────────
+const reachOf = (db: Db) => (db.reach ??= { code: 'KATORI23', challenges: [], telegram: false });
+
+/** You (from your real demo meals) and three made-up friends with plausible day counts. */
+function demoBoard(db: Db, cid: string) {
+  const c = reachOf(db).challenges.find((x) => x.id === cid);
+  if (!c) return [];
+  const today = istDay();
+  const elapsed = Math.max(
+    0,
+    Math.min(30, Math.round((Date.parse(today) - Date.parse(String(c.starts_on))) / 86_400_000) + 1),
+  );
+  const target = Number(db.profile?.protein_target ?? 100);
+  const byDay = groupByDay(db.meals as { eaten_at: string; kcal: number; protein_g: number }[]);
+  let mine = 0;
+  let logged = 0;
+  for (const [d, v] of byDay) {
+    if (d < String(c.starts_on) || d > today) continue;
+    logged++;
+    if (v.protein_g >= target) mine++;
+  }
+  const friends = [
+    ['Riya', 0.85],
+    ['Arjun', 0.6],
+    ['Sana', 0.35],
+  ] as const;
+  return [
+    { user_id: USER_ID, display_name: String(c.me), days_hit: mine, days_logged: logged, is_me: true },
+    ...friends.map(([name, rate], i) => ({
+      user_id: `dddddddd-0000-4000-8000-0000000f00${i}0`,
+      display_name: name,
+      days_hit: Math.round(elapsed * rate),
+      days_logged: Math.round(elapsed * Math.min(1, rate + 0.2)),
+      is_me: false,
+    })),
+  ].sort((a, b) => b.days_hit - a.days_hit || b.days_logged - a.days_logged);
 }
 
 function rest(db: Db, table: string, method: string, params: URLSearchParams, headers: Headers, body: Row | null) {
@@ -278,6 +372,17 @@ function rest(db: Db, table: string, method: string, params: URLSearchParams, he
   switch (table) {
     case 'coach_clients':
       return respondRows(db.profile?.role === 'coach' ? filterRows(db.trainer?.links ?? [], params) : [], headers);
+    case 'challenges':
+      return respondRows(filterRows(reachOf(db).challenges, params), headers);
+    case 'referrals':
+      return json([]);
+    case 'channel_links':
+      if (method === 'DELETE') {
+        reachOf(db).telegram = false;
+        save(db);
+        return new Response(null, { status: 204 });
+      }
+      return json(reachOf(db).telegram ? [{ channel: 'telegram', verified_at: new Date().toISOString() }] : []);
     case 'coach_billing':
       return json([]);
     case 'meal_comments': {

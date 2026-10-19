@@ -129,9 +129,13 @@ function Shell() {
             <Stack.Screen name="habit/[id]" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="body" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="goals" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="challenges" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="challenge/[id]" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="paywall" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           </Stack.Protected>
           <Stack.Screen name="join/[code]" />
+          <Stack.Screen name="r/[code]" />
+          <Stack.Screen name="c/[code]" />
           <Stack.Screen name="coach" />
           <Stack.Screen name="dev/components" />
         </Stack>

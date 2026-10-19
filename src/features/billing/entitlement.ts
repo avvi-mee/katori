@@ -40,21 +40,25 @@ export function useEntitlement() {
       return (data as Subscription | null) ?? null;
     },
   });
-  // Clients of a paying trainer are Pro too (public.is_pro); only ask when the user has no Pro of their own.
+  // Pro can also come from a paying trainer or free referral months (public.is_pro); only ask when the user
+  // has no Pro of their own.
   const own = isActive(query.data);
-  const sponsored = useQuery({
-    queryKey: ['subscription', uid, 'sponsored'],
+  const other = useQuery({
+    queryKey: ['subscription', uid, 'other'],
     enabled: !!uid && !query.isPending && !own,
     queryFn: async () => {
       const { data, error } = await supabase.rpc('my_pro_status');
       if (error) throw error;
-      const row = ((data as { pro: boolean; sponsored_by: string | null }[] | null) ?? [])[0];
-      return row?.pro && row.sponsored_by ? row.sponsored_by : null;
+      return (
+        ((data as { pro: boolean; sponsored_by: string | null; free_until: string | null }[] | null) ?? [])[0] ?? null
+      );
     },
   });
+  const extra = own ? null : other.data;
   return {
-    isPro: own || !!sponsored.data,
-    sponsoredBy: own ? null : (sponsored.data ?? null),
+    isPro: own || !!extra?.pro,
+    sponsoredBy: extra?.sponsored_by ?? null,
+    freeUntil: extra?.free_until ?? null,
     subscription: query.data ?? null,
     loading: query.isPending,
   };

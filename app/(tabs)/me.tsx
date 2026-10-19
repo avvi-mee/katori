@@ -23,6 +23,7 @@ import { kcalText } from '@/features/meals/format';
 import { PERSONAS, personaMeta } from '@/features/personas/personas';
 import { SavageSwitch } from '@/features/personas/SavageSwitch';
 import { MyCoachSection } from '@/features/coach/MyCoachSection';
+import { ReachSection } from '@/features/reach/ReachSection';
 import { useGoalsRow, useTargets } from '@/features/goals/api';
 import { disablePush, enablePush, pushEnabled } from '@/features/pwa/pwa';
 import { callFunction, errorText } from '@/lib/api';
@@ -75,7 +76,7 @@ export default function Me() {
       toast({ message: t('common.error'), tone: 'error' });
     }
   };
-  const { isPro, subscription, sponsoredBy } = useEntitlement();
+  const { isPro, subscription, sponsoredBy, freeUntil } = useEntitlement();
   const targets = useTargets();
   const { data: goalsRow } = useGoalsRow();
   const qc = useQueryClient();
@@ -227,10 +228,17 @@ export default function Me() {
       </Section>
 
       <MyCoachSection />
+      <ReachSection />
 
       <Section title={t('me.plan')}>
         {sponsoredBy ? (
           <Text variant="heading">{t('coach.proFromCoach', { name: sponsoredBy })}</Text>
+        ) : freeUntil && !(subscription && subscription.status === 'active') ? (
+          <Text variant="heading">
+            {t('reach.freeUntil', {
+              date: new Date(freeUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' }),
+            })}
+          </Text>
         ) : isPro && subscription ? (
           <>
             <View>

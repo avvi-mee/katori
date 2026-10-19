@@ -15,7 +15,7 @@ export function takeAfterAuth(): string | null {
     const v = globalThis.localStorage?.getItem(KEY) ?? null;
     if (v) globalThis.localStorage?.removeItem(KEY);
     // Only our own routes.
-    return v && /^\/(join\/[A-Z0-9]{8}|coach)$/.test(v) ? v : null;
+    return v && /^\/((join|r|c)\/[A-Z0-9]{8}|coach)$/.test(v) ? v : null;
   } catch {
     return null;
   }
