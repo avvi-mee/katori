@@ -34,7 +34,8 @@ jobs:
     name: Deploy (${{ github.event_name == 'push' && 'production' || 'preview' }})
     needs: check
     # Fork PRs have no access to secrets; they get checks only.
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    # Deploys are off until the repo variable DEPLOY_ENABLED is set to "true" (after adding the secrets).
+    if: vars.DEPLOY_ENABLED == 'true' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'push' && 'production' || 'preview' }}
     env:

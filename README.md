@@ -57,7 +57,7 @@ npm run typecheck           # app + edge functions
 
 Only `EXPO_PUBLIC_*` values go into the app. AI keys, payment keys, the cron secret and the Telegram token are Supabase function secrets (`npx supabase secrets set ...`) and never touch the client.
 
-CI uses two GitHub environments, `preview` and `production`, with the same variable names: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and the public `EXPO_PUBLIC_*` values. Pushing to `main` runs the tests, applies migrations, deploys the Edge Functions and publishes the PWA to Cloudflare Pages. Pull requests get their own preview deploy.
+CI uses two GitHub environments, `preview` and `production`, with the same variable names: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and the public `EXPO_PUBLIC_*` values. Deploys stay off until you set the repository variable `DEPLOY_ENABLED` to `true`. After that, pushing to `main` runs the tests, applies migrations, deploys the Edge Functions and publishes the PWA to Cloudflare Pages. Pull requests get their own preview deploy.
 
 The daily digest cron reads the project URL and a shared secret from Supabase Vault. Set them once in the SQL editor:
 
