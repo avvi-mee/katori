@@ -4,8 +4,6 @@ A fitness app for Indian gym-goers. Snap a photo of your thali, confirm the dish
 
 I built it because the popular calorie apps don't know what a katori of rajma or two rotis with ghee actually is. Katori is made for Indian food and speaks Hinglish.
 
-Live (PWA): https://katori.unmatrix.in
-
 ## What it does
 
 - **Photo food logging.** The AI only names the dishes and portions. The calories come from a reviewed Indian food table (`supabase/seed/food_items.csv`), so the numbers don't depend on a model guessing.
